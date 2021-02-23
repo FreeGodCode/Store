@@ -173,7 +173,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
-
+import datetime
 # 过期时间差
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
