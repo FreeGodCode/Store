@@ -134,10 +134,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = ('*')
+# CORS 跨域处理 cross-origin resource shareing
+# 配置允许跨站访问本站的地址
+CORS_ALLOW_CREDENTIALS = True  # 是否允许浏览器发送cookie
+CORS_ORIGIN_ALLOW_ALL = True  #
+# CORS_ORIGIN_WHITELIST = ()  # 允许所有
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8000',
+)
 
+# config allow request methods 配置允许访问的方法
 CORS_ALLOW_METHODS = (
     'GET',
     'POST',
@@ -148,6 +154,7 @@ CORS_ALLOW_METHODS = (
     'VIEW',
 )
 
+# 配置允许的header
 CORS_ALLOW_HEADERS = (
     'XMLHttpRequest',
     'X_FILENAME',
@@ -162,6 +169,7 @@ CORS_ALLOW_HEADERS = (
     'Pragma',
 )
 
+# 匹配根路由
 ROOT_URLCONF = 'store.urls'
 
 # rest_framework
@@ -173,6 +181,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
+
 import datetime
 # 过期时间差
 JWT_AUTH = {
