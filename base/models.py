@@ -137,7 +137,7 @@ class Area(models.Model):
     area_status = models.IntegerField(choices=AREA_STATUS_CHOICES, default=0, verbose_name='区域状态')
 
     class Meta:
-        table_name = 'db_area'
+        db_table = 'db_area'
         verbose_name = "区域"
 
     def __str__(self):
@@ -154,7 +154,7 @@ class Area(models.Model):
 #         return self.permission_name
 
 # class Meta:
-#     table_name = 'db_permission'
+#     db_table = 'db_permission'
 #     verbose_name = '权限'
 
 
@@ -202,7 +202,7 @@ class TotalWareHouse(models.Model):
     total_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='总仓创建时间')
 
     class Meta:
-        table_name = 'db_warehouse'
+        db_table = 'db_warehouse'
         verbose_name = "总仓"
 
     def __str__(self):
@@ -256,7 +256,7 @@ class Supplier(models.Model):
     supply_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='供应商修改时间')
 
     class Meta:
-        table_name = 'db_supplier'
+        db_table = 'db_supplier'
         verbose_name = "供应商"
 
     def __str__(self):
@@ -282,7 +282,7 @@ class Center(models.Model):
     center_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='中心修改时间')
 
     class Meta:
-        table_name = 'db_center'
+        db_table = 'db_center'
         verbose_name = "中心"
 
     def __str__(self):
@@ -313,7 +313,7 @@ class Customer(models.Model):
     customer_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='客户修改时间')
 
     class Meta:
-        table_name = "db_customer"
+        db_table = "db_customer"
         verbose_name = "客户"
 
     def __str__(self):
@@ -344,7 +344,7 @@ class Measure(models.Model):
     measure_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='计量单位修改时间')
 
     class Meta:
-        table_name = 'db_measure'
+        db_table = 'db_measure'
         verbose_name = "计量单位"
 
     def __str__(self):
@@ -367,7 +367,7 @@ class MaterialType(models.Model):
     type_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='物料修改时间')
 
     class Meta:
-        table_name = 'db_material_type'
+        db_table = 'db_material_type'
         verbose_name = "物料类别"
 
     def __str__(self):
@@ -403,7 +403,7 @@ class Material(models.Model):
     material_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='物料修改时间')
 
     class Meta:
-        table_name = 'db_material'
+        db_table = 'db_material'
         verbose_name = "物料"
 
     def __str__(self):
