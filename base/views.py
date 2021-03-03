@@ -124,7 +124,7 @@ class UserNewView(APIView):
         departments = Department.objects.filter(dpm_status=1).values_list('dpm_name', fiat=True)
         roles = Role.objects.filter(role_status=1).values_list('role', flat=True)
         areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
-        return HttpResponse({'max_identify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
+        return HttpResponse({'max_identifytify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
 
 
 class UserAddView(APIVIew):
@@ -572,7 +572,7 @@ class OrganizationView(APIView):
         organizations = Organization.objects.all()
         if organizations:
             organizations_serializer = OrganizationSerializer(organizations, many=True)
-            return Response({'max_identify': max_id, 'organizations': organizations_serializer.data})
+            return Response({'max_identifytify': max_id, 'organizations': organizations_serializer.data})
         else:
             return Response({'message': '未查询到组织信息'})
 
@@ -896,7 +896,7 @@ class TotalWareHousesView(APIView):
         totalWareHouses = TotalWareHouse.objects.all()
         if totalWareHouses:
             totalWareHouses_serializer = TotalWareHouseSerializer(totalWareHouses, many=True)
-            return Response({"max_identify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
+            return Response({"max_identifytify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
         else:
             return Response({"message": "未查询到信息"})
 
@@ -1048,7 +1048,7 @@ class CenterAddView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user_now = models.UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -1198,3 +1198,83 @@ class CenterWareHouseUpdateView(APIView):
             self.message = "更新失败"
             self.signal = 1
         return Response({'message': self.message, 'signal': self.signal})
+
+
+class SuppliersView(APIView):
+    """供应商接口"""
+
+    def get(self, request):
+        max_id = Supplier.objects.all().aggregate(Max('supply_identify'))['supply_identify__max']
+        suppliers = Supplier.objects.all()
+        if suppliers:
+            suppliers_serializer = SupplierSerializer(suppliers, many=True)
+            return Response({"max_identify": max_id, "suppliers": suppliers_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class SupplierAddView(APIView):
+    """新增供应商"""
+
+    def __init__(self, **kwargs):
+        super(SupplierAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = models.UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        max_id = Supplier.objects.all().aggregate(Max('supply_identify'))['supply_identify__max']
+        if max_id:
+            supply_identify = str(int(max_id) + 1).zfill(5)
+        else:
+            supply_identify = "0100001"
+        supply_name = data['supply_name']
+        supply_type = data['supply_type']
+        supply_remarks = data['supply_remarks']
+        Supplier.objects.create(supply_identify=supply_identify, supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks, supply_creator=self.user_now_name, supply_creator_iden=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class SupplierUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(SupplierUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        supply_identify = data['supply_identify']
+        supply_name = data['supply_name']
+        supply_type = data['supply_type']
+        supply_remarks = data['supply_remarks']
+        supply_status = data['supply_status']
+        supply_creator = data['supply_creator']
+        try:
+            Supplier.objects.filter(supply_identify=supply_identify).update(supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks)
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class SupplierStatusView(APIView):
+    """状态更新"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        supply_status = data['supply_status']
+        supply_identify = data['supply_identify']
+        supplier = models.Supplier.objects.filter(supply_identify=supply_identify)
+        if supplier:
+            supplier.update(supply_status=supply_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到供应商,状态更改失败"})
