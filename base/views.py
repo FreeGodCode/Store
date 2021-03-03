@@ -728,7 +728,9 @@ class DepartmentAddView(APIView):
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             if self.nameCheck(dpm_name):
-                models.Department.objects.create(dpm_name=dpm_name, dpm_remarks=dpm_remarks, dpm_status=0, dpm_center=dpm_center, dpm_creator=self.user_now_name, dpm_creator_identify=user_identify)
+                models.Department.objects.create(dpm_name=dpm_name, dpm_remarks=dpm_remarks, dpm_status=0,
+                                                 dpm_center=dpm_center, dpm_creator=self.user_now_name,
+                                                 dpm_creator_identify=user_identify)
         else:
             self.message = "用户未登录"
             self.signal = 2
@@ -791,6 +793,7 @@ class DepartmentStatusView(APIView):
         else:
             return Response({"message": "未查询到部门,状态更改失败"})
 
+
 class BrandsView(APIView):
     """品牌"""
 
@@ -804,6 +807,7 @@ class BrandsView(APIView):
 
 
 class BrandAddView(APIView):
+    """新增品牌"""
 
     def __init__(self, **kwargs):
         super(BrandAddView, self).__init__(**kwargs)
@@ -820,7 +824,8 @@ class BrandAddView(APIView):
         brand_name = data['brand_name']
         brand_description = data['brand_description']
         if self.nameCheck(brand_name):
-            Brand.objects.create(brand_name=brand_name, brand_status=0, brand_description=brand_description, brand_creator=self.user_now_name, brand_creator_identify=user_identify)
+            Brand.objects.create(brand_name=brand_name, brand_status=0, brand_description=brand_description,
+                                 brand_creator=self.user_now_name, brand_creator_identify=user_identify)
         return Response({'message': self.message, 'signal': self.signal})
 
     def nameCheck(self, name):
@@ -835,6 +840,8 @@ class BrandAddView(APIView):
 
 
 class BrandUpdateView(APIView):
+    """更新品牌信息"""
+
     def __init__(self, **kwargs):
         super(BrandUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
@@ -867,6 +874,8 @@ class BrandUpdateView(APIView):
 
 
 class BrandStatusView(APIView):
+    """状态变更"""
+
     def post(self, request):
         data = json.loads(self.request.body.decode("utf-8"))
         id = data["id"]
@@ -877,3 +886,142 @@ class BrandStatusView(APIView):
             return Response({"message": "状态更改成功", "signal": 0})
         else:
             return Response({"message": "未查询到品牌,状态更改失败"})
+
+
+class TotalWareHousesView(APIView):
+    """仓库接口"""
+
+    def get(self, request):
+        max_id = TotalWareHouse.objects.all().aggregate(Max('total_identifytify'))['total_identifytify__max']
+        totalWareHouses = TotalWareHouse.objects.all()
+        if totalWareHouses:
+            totalWareHouses_serializer = TotalWareHouseSerializer(totalWareHouses, many=True)
+            return Response({"max_identify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class TotalWareHouseNewView(APIView):
+    """"""
+
+    def get(self, request):
+        brands = Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
+        organizations = {}
+        centers = {}
+        areas_list = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        for area_name in areas_list:
+            organization = models.Organization.objects.filter(area_name=area_name, orga_status=1).values_list(
+                'org_name', flat=True)
+            center = Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name', flat=True)
+            organizations[area_name] = organization
+            centers[area_name] = center
+        return Response({"brands": brands, "organizations": organizations, "centers": centers, "areas": areas_list})
+
+
+class TotalWareHouseAddView(APIView):
+    """
+    这里绑定组织通过area_name和org_name再绑定
+    可以优化为传入前端org_identify ，传回的时候传identify
+    """
+
+    def __init__(self, **kwargs):
+        super(TotalWareHouseAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        user_now_iden = data['user_now_iden']
+        user_now = models.UserNow.objects.get(user_iden=user_now_iden)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        total_identify = data['total_identify']
+        total_name = data['total_name']
+        area_name = data['area_name']
+        orga_name = data['orga_name']
+        brand_name = data['brand_name']
+        total_belong_center = data['total_belong_center']
+        try:
+            total_belong_center_iden = models.Center.objects.get(center_name=total_belong_center, area_name=area_name)
+        except models.Center.DoesNotExist:
+            total_belong_center_iden = ""
+        else:
+            total_belong_center_iden = total_belong_center_iden.id
+
+        total_remarks = data['total_remarks']
+
+        organization = models.Organization.objects.get(area_name=area_name, orga_name=orga_name)
+        if self.idCheck(total_identify):
+            models.TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name,
+                                                 total_belong_center=total_belong_center,
+                                                 total_belong_center_iden=total_belong_center_iden,
+                                                 brand_name=brand_name,
+                                                 organization=organization,
+                                                 total_remarks=total_remarks,
+                                                 total_status=0,
+                                                 total_creator=self.user_now_name,
+                                                 total_creator_iden=user_now_iden)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, total_identify):
+        try:
+            user = models.TotalWareHouse.objects.get(total_identify=total_identify)
+        except models.TotalWareHouse.DoesNotExist:
+            return True
+        else:
+            self.message = "仓库id已存在"
+            self.signal = 1
+            return False
+
+
+class TotalWareHouseUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(TotalWareHouseUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data['id']
+        total_identify = data['total_identify']
+        total_name = data['total_name']
+        brand_name = data['brand_name']
+        total_remarks = data['total_remarks']
+        if self.idCheck(total_identify, id):
+            try:
+                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name,
+                                                                                    brand_name=brand_name,
+                                                                                    total_remarks=total_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, total_identify, id):
+        try:
+            warehouse = TotalWareHouse.objects.get(~Q(id=id), total_identify=total_identify)
+        except TotalWareHouse.DoesNotExist:
+            return True
+        else:
+            self.message = "仓库id已存在"
+            self.signal = 1
+            return False
+
+
+class TotalWareHouseStatusView(APIView):
+    """状态变更"""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data["id"]
+        total_status = data['total_status']
+        total = TotalWareHouse.objects.filter(id=id)
+        if total:
+            total.update(total_status=total_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到仓库,状态更改失败"})
