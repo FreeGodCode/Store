@@ -494,3 +494,73 @@ class CustomerAddView(APIView):
             self.message = "客户名已经存在"
             self.signal = 1
             return False
+
+
+class CustomerUpdateView(APIView):
+    """更新客户"""
+
+    def __init__(self, **kwargs):
+        super(CustomerUpdateView, self).__init__(**kwargs)
+        self.message = '更新成功'
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode('utf-8'))
+        id = data['id']
+        customer_identify = data['customer_identify']
+        customer_name = data['customer_name']
+        customer_type = data['customer_type']
+        customer_remarks = data['customer_remarks']
+        customer_status = data['customer_status']
+        customer_creator = data['customer_creator']
+        if self.idCheck(customer_identify, id):
+            if self.nameCheck(customer_name, id):
+                try:
+                    Customer.objects.filter(id=id).update(customer_name=customer_name,
+                                                          customer_identify=customer_identify,
+                                                          customer_type=customer_type,
+                                                          customer_remarks=customer_remarks,
+                                                          customer_status=customer_status,
+                                                          customer_creator=customer_creator)
+                except:
+                    self.message = '更新失败'
+                    self.signal = 2
+
+        return Response({'messaage': self.message, 'signal': self.signal})
+
+    def idCheck(self, customer_identify, id):
+        try:
+            customer = Customer.objects.get(~Q(id=id), customer_identify=customer_identify)
+        except Customer.DoesNotExist:
+            return True
+        else:
+            self.message = '客户id已经存在'
+            self.signal = 1
+            return False
+
+    def nameCheck(self, customer_name, id):
+        try:
+            customer = Customer.objects.get(~Q(id=id), customer_name=customer_name)
+        except Customer.DoesNotExist:
+            return True
+        else:
+            self.message = '客户已经存在'
+            self.signal = 1
+            return False
+
+
+class CustomerStatusView(APIView):
+    """更新客户状态"""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode('utf-8'))
+        customer_status = data['customer_status']
+        customer_identify = data['customer_identify']
+        customer = Customer.objects.filter(customer_identify=customer_identify)
+        if customer:
+            customer.update(customer_status=customer_status)
+            return Response({'message': '状态更新成功', 'signal': 0})
+        else:
+            return Response({'message': '未查询到客户， 状态更改失败'})
+
+
