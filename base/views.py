@@ -124,7 +124,7 @@ class UserNewView(APIView):
         departments = Department.objects.filter(dpm_status=1).values_list('dpm_name', fiat=True)
         roles = Role.objects.filter(role_status=1).values_list('role', flat=True)
         areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
-        return HttpResponse({'max_identifytify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
+        return HttpResponse({'max_identify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
 
 
 class UserAddView(APIVIew):
@@ -572,7 +572,7 @@ class OrganizationView(APIView):
         organizations = Organization.objects.all()
         if organizations:
             organizations_serializer = OrganizationSerializer(organizations, many=True)
-            return Response({'max_identifytify': max_id, 'organizations': organizations_serializer.data})
+            return Response({'max_identify': max_id, 'organizations': organizations_serializer.data})
         else:
             return Response({'message': '未查询到组织信息'})
 
@@ -896,7 +896,7 @@ class TotalWareHousesView(APIView):
         totalWareHouses = TotalWareHouse.objects.all()
         if totalWareHouses:
             totalWareHouses_serializer = TotalWareHouseSerializer(totalWareHouses, many=True)
-            return Response({"max_identifytify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
+            return Response({"max_identify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
         else:
             return Response({"message": "未查询到信息"})
 
@@ -1048,7 +1048,7 @@ class CenterAddView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_identifytify']
+        user_identify = data['user_identify']
         user_now = models.UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -1224,7 +1224,7 @@ class SupplierAddView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identify']
         user_now = models.UserNow.objects.get(user_iden=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -1278,3 +1278,304 @@ class SupplierStatusView(APIView):
             return Response({"message": "状态更改成功", "signal": 0})
         else:
             return Response({"message": "未查询到供应商,状态更改失败"})
+
+
+class MeasureView(APIView):
+    """"""
+
+    def get(self, request):
+        max_id = Measure.objects.all().aggregate(Max('measure_identify'))['measure_identify__max']
+        measure = Measure.objects.all()
+        if measure:
+            measure_serializer = measureerializer(measure, many=True)
+            logger.info(measure_serializer.data)
+            # print(measure_serializer.data)
+            return Response({"max_identify": max_id, "measure": measure_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MeasureAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(MeasureAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        measure_identify = data['measure_identify']
+        measure_name = data['measure_name']
+        measure_dimension = data['measure_dimension']
+
+        if self.idCheck(measure_identify):
+            if self.nameCheck(measure_name):
+                Measure.objects.create(measure_identify=measure_identify, measure_name=measure_name,
+                                               measure_dimension=measure_dimension, measure_status=0,
+                                               measure_creator=self.user_now_name,
+                                               measure_creator_iden=user_identify)
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, measure_identify):
+        try:
+            measure = Measure.objects.get(measure_identify=measure_identify)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, measure_name):
+        try:
+            measure = Measure.objects.get(measure_name=measure_name)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位名字已存在"
+            self.signal = 2
+            return False
+
+
+class MeasureUpdateView(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        measure_identify = data['measure_identify']
+        measure_name = data['measure_name']
+        measure_dimension = data['measure_dimension']
+
+        if self.idCheck(measure_identify, id):
+            try:
+                Measure.objects.filter(id=id).update(measure_name=measure_name,
+                                                             measure_dimension=measure_dimension)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, measure_identify, id):
+        try:
+            measure = Measure.objects.get(~Q(id=id), measure_identify=measure_identify)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位id已存在"
+            self.signal = 1
+            return False
+
+
+class MeasureStatusView(APIView):
+    """"""
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        measure_status = data['measure_status']
+        id = data["id"]
+        measure = Measure.objects.filter(id=id)
+        if measure:
+            measure.update(measure_status=measure_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到计量单位,状态更改失败"})
+
+
+class MaterialTypesView(APIView):
+    """物料类别"""
+
+    def get(self, request):
+        max_id = MaterialType.objects.all().aggregate(Max('type_identify'))['type_identify__max']
+        material_types = MaterialType.objects.all()
+        if material_types:
+            print(max_id)
+            material_types_serializer = MaterialTypeSerializer(material_types, many=True)
+            return Response({"max_identify": max_id, "material_types": material_types_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MaterialTypeNewView(APIView):
+    pass
+
+
+class MaterialTypeAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(MaterialTypeAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_idenify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        type_identify = data['type_identify']
+        type_name = data['type_name']
+
+        if self.idCheck(type_iden):
+            MaterialType.objects.create(type_iden=type_iden, type_name=type_name, type_status=0, type_creator=self.user_now_name, type_creator_identify=user_identify)
+
+        return Response({"message": self.message, "signal": self.signal})
+
+    def idCheck(self, type_identify):
+        try:
+            measure = MaterialType.objects.get(type_identify=type_identify)
+        except MaterialType.DoesNotExist:
+            return True
+        else:
+            self.message = "物料类别id已存在"
+            self.signal = 1
+            return False
+
+
+class MaterialTypeUpdateView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialTypeUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+
+        id = data['id']
+        type_identify = data['type_identify']
+        type_name = data['type_name']
+
+        try:
+            MaterialType.objects.filter(id=id).update(type_name=type_name)
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({"message": self.message, "signal": self.signal})
+
+
+class MaterialTypeStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        type_status = data['type_status']
+        id = data["id"]
+        type = MaterialType.objects.filter(id=id)
+        if type:
+            type.update(type_status=type_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到物料类别,状态更改失败"})
+
+
+class MaterialView(APIView):
+    """"""
+
+    def get(self, request):
+        materials = Material.objects.all()
+        if materials:
+            materials_serializer = MaterialSerializer(materials, many=True)
+            return Response({"materials": materials_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MaterialNewView(APIView):
+    """物料获取"""
+
+    def get(self, request):
+        """物料类别及其名字和最大流水号编码"""
+        material_types = Material.objects.filter(type_status=1).values_list('type_identify', 'type_name')
+        measure = models.Meterage.objects.filter(measure_status=1).values_list('measure_dimension',   'measure_identify', 'measure_name')
+        return Response({"material_types": material_types, "measure": measure})
+
+
+class MaterialAddView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        material_name = data['material_name']
+        material_type_identify = data['material_type_identify']
+        material_specification = data['material_specification']
+        material_model = data['material_model']
+        measure_name = data['measure_name']
+        material_attr = data['material_attr']
+
+        max_id = Material.objects.filter(material_type_identify=material_type_identify).aggregate(Max('material_identify'))['material_identify__max']
+        if max_id:
+            material_identify = str(int(max_id) + 1)
+        else:
+            material_identify = material_type_identify + "00001"
+        Material.objects.create(material_identify=material_identify, material_name=material_name,
+                                       material_type_identify=material_type_identify,
+                                       material_specification=material_specification,
+                                       material_model=material_model, measure_name=measure_name,
+                                       material_attr=material_attr, material_status=0,
+                                       material_creator=self.user_now_name,
+                                       material_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class MaterialUpdateView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        material_identify = data['material_identify']
+        material_name = data['material_name']
+        material_specification = data['material_specification']
+        material_model = data['material_model']
+        measure_name = data['measure_name']
+        material_attr = data['material_attr']
+
+        try:
+            Material.objects.filter(id=id).update(material_name=material_name, material_specification=material_specification, material_model=material_model,   measure_name=measure_name, material_attr=material_attr, )
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class MaterialStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        material_status = data['material_status']
+        material = Material.objects.filter(id=id)
+        if material:
+            material.update(material_status=material_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到物料,状态更改失败"})
