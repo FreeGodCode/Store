@@ -33,9 +33,9 @@ class LoginView(APIView):
     """登录"""
 
     def post(self, request):
-        json_data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = json_data['user_identify']
-        user_passwd = json_data['user_passwd']
+        data = json.loads(self.request.body.decode('utf-8'))
+        user_identify = data['user_identify']
+        user_passwd = data['user_passwd']
         user_now = UserNow.objects.filter(user_identify=user_identify)
         logger.info('now user is user_now')
         if user_now:
@@ -87,7 +87,7 @@ class LoginExitView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf_8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         try:
             user_now = UserNow.objects.get(user_identify=user_identify)
         except UserNow.DoesNotExist:
@@ -103,7 +103,7 @@ class UserView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user = UserNow.objects.filter(user_identify=user_identify)
         if user:
             try:
@@ -138,7 +138,7 @@ class UserAddView(APIVIew):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user = UserNow.objects.get(user_identify=user_identify)
         if user:
             self.user_now_name = user.user_name
@@ -158,7 +158,7 @@ class UserAddView(APIVIew):
                                                     user_phone_number=user_phone_number, email=email, is_active=0,
                                                     user_departments=user_departments, user_roles=user_roles,
                                                     user_creator=self.user_now_name,
-                                                    user_creator_identify=user_now_identify, area_name=area_name)
+                                                    user_creator_identify=user_identifytify, area_name=area_name)
                     # pass
         return HttpResponse({'message': self.message, 'signal': self.signal})
 
@@ -344,7 +344,7 @@ class RoleAddView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         role = data['role']
         role_permission = data['role_permission']
@@ -458,7 +458,7 @@ class CustomerAddView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user_now = UserNOw.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -596,7 +596,7 @@ class OrganizationAddView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -694,3 +694,99 @@ class OrganizationStatusView(APIView):
             return Response({"message": "状态更改成功", "signal": 0})
         else:
             return Response({"message": "未查询到组织,状态更改失败"})
+
+
+class DepartmentsView(APIView):
+    """部门视图接口"""
+
+    def get(self, request):
+        dpms = Department.objects.all()
+        if dpms:
+            dpms_serializer = DepartmentSerializer(dpms, many=True)
+            return Response({"departments": dpms_serializer.data})
+        else:
+            return Response({"message": "未查询到部门信息"})
+
+
+class DepartmentAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(DepartmentAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        dpm_name = data['dpm_name']
+        dpm_remarks = data['dpm_remarks']
+        dpm_center = data['dpm_center']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            if self.nameCheck(dpm_name):
+                models.Department.objects.create(dpm_name=dpm_name, dpm_remarks=dpm_remarks, dpm_status=0, dpm_center=dpm_center, dpm_creator=self.user_now_name, dpm_creator_identify=user_identify)
+        else:
+            self.message = "用户未登录"
+            self.signal = 2
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, dpm_name):
+        try:
+            dpm = Department.objects.get(dpm_name=dpm_name)
+        except Department.DoesNotExist:
+            return True
+        else:
+            self.message = "角色已经存在"
+            self.signal = 1
+            return False
+
+
+class DepartmentUpdateView(APIView):
+    def __init__(self, **kwargs):
+        super(DepartmentUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data['id']
+        dpm_remarks = data['dpm_remarks']
+        dpm_name = data['dpm_name']
+        # dpm_status = data['dpm_status']
+        if self.nameCheck(dpm_name, id):
+            try:
+                models.Department.objects.filter(id=id).update(dpm_name=dpm_name, dpm_remarks=dpm_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name, id):
+        try:
+            dpm = Department.objects.get(~Q(id=id), dpm_name=name)
+        except Department.DoesNotExist:
+            return True
+        else:
+            self.message = "部门名字已经存在"
+            self.signal = 2
+            return False
+
+
+class DepartmentStatusView(APIView):
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data["id"]
+        dpm_status = data['dpm_status']
+        # dpm_identify = data['dpm_identify']
+        dpm = Department.objects.filter(id=id)
+        if dpm:
+            dpm.update(dpm_status=dpm_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到部门,状态更改失败"})
