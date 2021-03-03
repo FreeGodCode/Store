@@ -718,7 +718,7 @@ class DepartmentAddView(APIView):
 
     def post(self, request):
         data = json.loads(self.request.body.decode("utf-8"))
-        user_identify = data['user_now_identify']
+        user_identify = data['user_identifytify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -790,3 +790,90 @@ class DepartmentStatusView(APIView):
             return Response({"message": "状态更改成功", "signal": 0})
         else:
             return Response({"message": "未查询到部门,状态更改失败"})
+
+class BrandsView(APIView):
+    """品牌"""
+
+    def get(self, request):
+        brands = Brand.objects.all()
+        if brands:
+            brands_serializer = BrandSerializer(brands, many=True)
+            return Response({"brands": brands_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class BrandAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(BrandAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        brand_name = data['brand_name']
+        brand_description = data['brand_description']
+        if self.nameCheck(brand_name):
+            Brand.objects.create(brand_name=brand_name, brand_status=0, brand_description=brand_description, brand_creator=self.user_now_name, brand_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name):
+        try:
+            brand = Brand.objects.get(brand_name=name)
+        except Brand.DoesNotExist:
+            return True
+        else:
+            self.message = "品牌已经存在"
+            self.signal = 1
+            return False
+
+
+class BrandUpdateView(APIView):
+    def __init__(self, **kwargs):
+        super(BrandUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data['id']
+        brand_name = data['brand_name']
+        brand_description = data['brand_description']
+        # brand_status = data['brand_status']
+        # brand_creator = data['brand_creator']
+        if self.nameCheck(brand_name, id):
+            try:
+                Brand.objects.filter(id=id).update(brand_name=brand_name, brand_description=brand_description, )
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name, id):
+        try:
+            brand = Brand.objects.get(~Q(id=id), brand_name=name)
+        except Brand.DoesNotExist:
+            return True
+        else:
+            self.message = "品牌已经存在"
+            self.signal = 2
+            return False
+
+
+class BrandStatusView(APIView):
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data["id"]
+        brand_status = data['brand_status']
+        brand = Brand.objects.filter(id=id)
+        if brand:
+            brand.update(brand_status=brand_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到品牌,状态更改失败"})
