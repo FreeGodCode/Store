@@ -33,7 +33,7 @@ class LoginView(APIView):
     """登录"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         user_identify = data['user_identify']
         user_passwd = data['user_passwd']
         user_now = UserNow.objects.filter(user_identify=user_identify)
@@ -86,8 +86,8 @@ class LoginExitView(APIView):
     """退出"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf_8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf_8'))
+        user_identify = data['user_identify']
         try:
             user_now = UserNow.objects.get(user_identify=user_identify)
         except UserNow.DoesNotExist:
@@ -102,8 +102,8 @@ class UserView(APIView):
     """用户信息"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user = UserNow.objects.filter(user_identify=user_identify)
         if user:
             try:
@@ -137,8 +137,8 @@ class UserAddView(APIVIew):
         self.user_now_name = ''
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user = UserNow.objects.get(user_identify=user_identify)
         if user:
             self.user_now_name = user.user_name
@@ -158,7 +158,7 @@ class UserAddView(APIVIew):
                                                     user_phone_number=user_phone_number, email=email, is_active=0,
                                                     user_departments=user_departments, user_roles=user_roles,
                                                     user_creator=self.user_now_name,
-                                                    user_creator_identify=user_identifytify, area_name=area_name)
+                                                    user_creator_identify=user_identify, area_name=area_name)
                     # pass
         return HttpResponse({'message': self.message, 'signal': self.signal})
 
@@ -205,7 +205,7 @@ class UserUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         username = data['username']
         user_name = data['user_name']
@@ -263,7 +263,7 @@ class UserStatusView(APIView):
     """用户状态"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         is_active = data['is_active']
         username = data['username']
         user = UserProfile.objects.filter(username=username)
@@ -343,8 +343,8 @@ class RoleAddView(APIView):
         self.user_now_name = ''
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         role = data['role']
         role_permission = data['role_permission']
@@ -378,7 +378,7 @@ class RoleUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role = data['role']
         role_permission = data['role_permission']
@@ -408,7 +408,7 @@ class RoleStatusView(APIView):
     """角色状态更新"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role_status = data['role_status']
         role = Role.objects.filter(id=id)
@@ -423,7 +423,7 @@ class RolePermissionAddSaveView(APIView):
     """角色权限添加"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role_permission = data['role_permission']
         try:
@@ -457,8 +457,8 @@ class CustomerAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user_now = UserNOw.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -505,7 +505,7 @@ class CustomerUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         customer_identify = data['customer_identify']
         customer_name = data['customer_name']
@@ -553,7 +553,7 @@ class CustomerStatusView(APIView):
     """更新客户状态"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         customer_status = data['customer_status']
         customer_identify = data['customer_identify']
         customer = Customer.objects.filter(customer_identify=customer_identify)
@@ -595,8 +595,8 @@ class OrganizationAddView(APIView):
         self.use_now_name = ''
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -641,7 +641,7 @@ class OrganizationUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data["id"]
         org_identify = data['org_identify']
         org_name = data['org_name']
@@ -682,7 +682,7 @@ class OrganizationStatusView(APIView):
     """"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
 
         org_status = data['org_status']
         org_identify = data['org_identify']
@@ -717,8 +717,8 @@ class DepartmentAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
-        user_identify = data['user_identifytify']
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -755,7 +755,7 @@ class DepartmentUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data['id']
         dpm_remarks = data['dpm_remarks']
         dpm_name = data['dpm_name']
@@ -782,7 +782,7 @@ class DepartmentUpdateView(APIView):
 
 class DepartmentStatusView(APIView):
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data["id"]
         dpm_status = data['dpm_status']
         # dpm_identify = data['dpm_identify']
@@ -816,8 +816,8 @@ class BrandAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
         user_now = UserNow.objects.get(user_iden=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -848,7 +848,7 @@ class BrandUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data['id']
         brand_name = data['brand_name']
         brand_description = data['brand_description']
@@ -877,7 +877,7 @@ class BrandStatusView(APIView):
     """状态变更"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data["id"]
         brand_status = data['brand_status']
         brand = Brand.objects.filter(id=id)
@@ -892,7 +892,7 @@ class TotalWareHousesView(APIView):
     """仓库接口"""
 
     def get(self, request):
-        max_id = TotalWareHouse.objects.all().aggregate(Max('total_identifytify'))['total_identifytify__max']
+        max_id = TotalWareHouse.objects.all().aggregate(Max('total_identify'))['total_identify__max']
         totalWareHouses = TotalWareHouse.objects.all()
         if totalWareHouses:
             totalWareHouses_serializer = TotalWareHouseSerializer(totalWareHouses, many=True)
@@ -931,38 +931,30 @@ class TotalWareHouseAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
-        user_now_iden = data['user_now_iden']
-        user_now = models.UserNow.objects.get(user_iden=user_now_iden)
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = models.UserNow.objects.get(user_iden=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
 
         total_identify = data['total_identify']
         total_name = data['total_name']
         area_name = data['area_name']
-        orga_name = data['orga_name']
+        org_name = data['org_name']
         brand_name = data['brand_name']
         total_belong_center = data['total_belong_center']
         try:
-            total_belong_center_iden = models.Center.objects.get(center_name=total_belong_center, area_name=area_name)
+            total_belong_center_identify = models.Center.objects.get(center_name=total_belong_center, area_name=area_name)
         except models.Center.DoesNotExist:
-            total_belong_center_iden = ""
+            total_belong_center_identify = ""
         else:
-            total_belong_center_iden = total_belong_center_iden.id
+            total_belong_center_identify = total_belong_center_identify.id
 
         total_remarks = data['total_remarks']
 
-        organization = models.Organization.objects.get(area_name=area_name, orga_name=orga_name)
+        organization = Organization.objects.get(area_name=area_name, org_name=org_name)
         if self.idCheck(total_identify):
-            models.TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name,
-                                                 total_belong_center=total_belong_center,
-                                                 total_belong_center_iden=total_belong_center_iden,
-                                                 brand_name=brand_name,
-                                                 organization=organization,
-                                                 total_remarks=total_remarks,
-                                                 total_status=0,
-                                                 total_creator=self.user_now_name,
-                                                 total_creator_iden=user_now_iden)
+            TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name, total_belong_center=total_belong_center, total_belong_center_identify=total_belong_center_identify, brand_name=brand_name, organization=organization, total_remarks=total_remarks, total_status=0, total_creator=self.user_now_name, total_creator_iden=user_identify)
         return Response({'message': self.message, 'signal': self.signal})
 
     def idCheck(self, total_identify):
@@ -985,7 +977,7 @@ class TotalWareHouseUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data['id']
         total_identify = data['total_identify']
         total_name = data['total_name']
@@ -993,9 +985,7 @@ class TotalWareHouseUpdateView(APIView):
         total_remarks = data['total_remarks']
         if self.idCheck(total_identify, id):
             try:
-                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name,
-                                                                                    brand_name=brand_name,
-                                                                                    total_remarks=total_remarks)
+                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name, brand_name=brand_name, total_remarks=total_remarks)
             except:
                 self.message = "更新失败"
                 self.signal = 1
@@ -1016,7 +1006,7 @@ class TotalWareHouseStatusView(APIView):
     """状态变更"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data["id"]
         total_status = data['total_status']
         total = TotalWareHouse.objects.filter(id=id)
@@ -1057,9 +1047,9 @@ class CenterAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
-        user_now_iden = data['user_now_iden']
-        user_now = models.UserNow.objects.get(user_iden=user_now_iden)
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = models.UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
         # center_iden = data['center_iden']
@@ -1068,7 +1058,7 @@ class CenterAddView(APIView):
         center_remarks = data['center_remarks']
         if self.isExist(center_name, area_name):
             Center.objects.create(center_name=center_name, area_name=area_name, center_remarks=center_remarks,
-                                  center_status=0, center_creator=self.user_now_name, center_creator_iden=user_now_iden)
+                                  center_status=0, center_creator=self.user_now_name, center_creator_iden=user_identify)
             logger.info('中心创建')
         return Response({'message': self.message, 'signal': self.signal})
 
@@ -1093,7 +1083,7 @@ class CenterUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data['id']
         center_name = data['center_name']
         area_name = data['area_name']
@@ -1122,7 +1112,7 @@ class CenterStatusView(APIView):
     """状态变更"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode("utf-8"))
+        data = json.loads(request.body.decode("utf-8"))
         id = data["id"]
         center_status = data['center_status']
         center = Center.objects.filter(id=id)
@@ -1133,77 +1123,78 @@ class CenterStatusView(APIView):
             return Response({"message": "未查询到中心,状态更改失败"})
 
 
-# class CenterWareHousesView(APIView):
-#
-#     def get(self, request):
-#         centerWareHouses = models.CenterWareHouse.objects.all()
-#         if centerWareHouses:
-#             centerWareHouses_serializer = CenterWareHouseSerializer(centerWareHouses, many=True)
-#             return Response({"centerWareHouses": centerWareHouses_serializer.data})
-#
-#
-# class CenterWareHouseNewView(APIView):
-#     def get(self, request):
-#         brands = models.Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
-#         organizations = {}
-#         areas_name = models.Area.objects.filter(area_status=1).values_list('area_name', flat=True)
-#         for area_name in areas_name:
-#             orga_center = []
-#             organization = models.Organization.objects.filter(area_name=area_name, orga_status=1).values_list(
-#                 'orga_name', flat=True)
-#             center = models.Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name',
-#                                                                                                     flat=True)
-#             orga_center.append(organization)
-#             orga_center.append(center)
-#             organizations[area_name] = orga_center
-#         return Response({"brands": brands, "organizations": organizations})
-#
-#
-# class CenterWareHouseAddView(APIView):
-#
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self.message = "添加成功"
-#         self.signal = 0
-#
-#     def post(self, request):
-#         json_data = json.loads(self.request.body.decode("utf-8"))
-#         center_wh_iden = json_data['center_wh_iden']
-#         center_wh_name = json_data['center_wh_name']
-#         area_name = json_data['area_name']
-#         orga_name = json_data['orga_name']
-#         center_name = json_data['center_name']
-#         brand_name = json_data['brand_name']
-#         center_wh_remarks = json_data['center_wh_remarks']
-#         center_wh_status = json_data['center_wh_status']
-#         center_wh_creator = json_data['center_wh_creator']
-#         organization = models.Organization.objects.get(area_name=area_name, orga_name=orga_name)
-#         center = models.Center.objects.get(center_name=center_name)
-#         models.CenterWareHouse.objects.create(center_wh_iden=center_wh_iden, center_wh_name=center_wh_name,
-#                                               organization=organization, center=center,
-#                                               brand_name=brand_name,
-#                                               center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status,
-#                                               center_wh_creator=center_wh_creator)
-#         return Response({'message': self.message, 'signal': self.signal})
-#
-#
-# class CenterWareHouseUpdateView(APIView):
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self.message = "更新成功"
-#         self.signal = 0
-#
-#     def post(self, request):
-#         json_data = json.loads(self.request.body.decode("utf-8"))
-#         center_wh_iden = json_data['center_wh_iden']
-#         center_wh_remarks = json_data['center_wh_remarks']
-#         center_wh_status = json_data['center_wh_status']
-#         # center_wh_creator = json_data['center_wh_creator']
-#         try:
-#             models.CenterWareHouse.objects.filter(center_wh_iden=center_wh_iden, ).update(
-#                 center_wh_remarks=center_wh_remarks,
-#                 center_wh_status=center_wh_status, )
-#         except:
-#             self.message = "更新失败"
-#             self.signal = 1
-#         return Response({'message': self.message, 'signal': self.signal})
+class CenterWareHousesView(APIView):
+    """中心仓库接口"""
+
+    def get(self, request):
+        center_whs = CenterWareHouse.objects.all()
+        if center_whs:
+            center_whs_serializer = CenterWareHouseSerializer(center_whs, many=True)
+            return Response({"centerWareHouses": center_whs_serializer.data})
+
+
+class CenterWareHouseNewView(APIView):
+    """获取中心仓"""
+
+    def get(self, request):
+        brands = Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
+        organizations = {}
+        areas_list = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        for area_name in areas_list:
+            org_center = []
+            organization = Organization.objects.filter(area_name=area_name, orga_status=1).values_list('org_name', flat=True)
+            center = Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name', flat=True)
+            org_center.append(organization)
+            org_center.append(center)
+            organizations[area_name] = org_center
+        return Response({"brands": brands, "organizations": organizations})
+
+
+class CenterWareHouseAddView(APIView):
+    """新增"""
+
+    def __init__(self, **kwargs):
+        super(CenterWareHouseAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        center_wh_identify = data['center_wh_identify']
+        center_wh_name = data['center_wh_name']
+        area_name = data['area_name']
+        org_name = data['org_name']
+        center_name = data['center_name']
+        brand_name = data['brand_name']
+        center_wh_remarks = data['center_wh_remarks']
+        center_wh_status = data['center_wh_status']
+        center_wh_creator = data['center_wh_creator']
+        organization = Organization.objects.get(area_name=area_name, org_name=org_name)
+        center = Center.objects.get(center_name=center_name)
+        CenterWareHouse.objects.create(center_wh_identify=center_wh_identify, center_wh_name=center_wh_name,
+                                       organization=organization, center=center, brand_name=brand_name,
+                                       center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status,
+                                       center_wh_creator=center_wh_creator)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class CenterWareHouseUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(CenterWareHouseUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        center_wh_identify = data['center_wh_identify']
+        center_wh_remarks = data['center_wh_remarks']
+        center_wh_status = data['center_wh_status']
+        try:
+            CenterWareHouse.objects.filter(center_wh_identify=center_wh_identify, ).update(
+                center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status, )
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
