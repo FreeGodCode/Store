@@ -564,3 +564,133 @@ class CustomerStatusView(APIView):
             return Response({'message': '未查询到客户， 状态更改失败'})
 
 
+class OrganizationView(APIView):
+    """组织接口"""
+
+    def get(self, request):
+        max_id = Organization.objects.all().aggregate(Max('org_identify'))['org_identify__max']
+        organizations = Organization.objects.all()
+        if organizations:
+            organizations_serializer = OrganizationSerializer(organizations, many=True)
+            return Response({'max_identify': max_id, 'organizations': organizations_serializer.data})
+        else:
+            return Response({'message': '未查询到组织信息'})
+
+
+class OrganizationNewView(APIView):
+    """"""
+
+    def get(self, request):
+        areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        return Response({'areas': areas})
+
+
+class OrganizationAddView(APIView):
+    """新增组织"""
+
+    def __init__(self, **kwargs):
+        super(OrganizationAddView, self).__init__(**kwargs)
+        self.message = '添加成功'
+        self.signal = 0
+        self.use_now_name = ''
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode('utf-8'))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        org_identify = data['org_identify']
+        org_name = data['org_name']
+        area_name = data['area_name']
+        org_remarks = data['org_remarks']
+        if self.idCheck(org_identify):
+            if self.nameCheck(org_name):
+                Organization.objects.create(org_identify=org_identify, org_name=org_name, area_name=area_name,
+                                            org_remarks=org_remarks, org_status=0, org_creator=self.user_now_name,
+                                            org_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, org_identify):
+        try:
+            org = Organization.objects.get(org_identify=org_identify)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, org_name):
+        try:
+            org_name = Organization.objects.get(org_name=org_name)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织名已经存在"
+            self.signal = 1
+            return False
+
+
+class OrganizationUpdateView(APIView):
+    """更新组织"""
+
+    def __init__(self, **kwargs):
+        super(OrganizationUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data["id"]
+        org_identify = data['org_identify']
+        org_name = data['org_name']
+        org_remarks = data['org_remarks']
+        # org_creator = data['org_creator']
+        if self.idCheck(org_identify, id):
+            if self.nameCheck(org_name, id):
+                try:
+                    Organization.objects.filter(id=id).update(org_identify=org_identify, org_name=org_name,
+                                                              org_remarks=org_remarks, )
+                except:
+                    self.message = "更新失败"
+                    self.signal = 2
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, org_identify, id):
+        try:
+            org = Organization.objects.get(~Q(id=id), org_identify=org_identify)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, org_name, id):
+        try:
+            org = Organization.objects.get(~Q(id=id), org_name=org_name)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织名已经存在"
+            self.signal = 1
+            return False
+
+
+class OrganizationStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+
+        org_status = data['org_status']
+        org_identify = data['org_identify']
+
+        organization = Organization.objects.filter(org_identify=org_identify)
+
+        if organization:
+            organization.update(org_status=org_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到组织,状态更改失败"})
