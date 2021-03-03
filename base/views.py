@@ -1025,3 +1025,185 @@ class TotalWareHouseStatusView(APIView):
             return Response({"message": "状态更改成功", "signal": 0})
         else:
             return Response({"message": "未查询到仓库,状态更改失败"})
+
+
+class CentersView(APIView):
+    """中心接口"""
+
+    def get(self, request):
+        centers = Center.objects.all()
+        if centers:
+            centers_serializer = CenterSerializer(centers, many=True)
+            return Response({"centers": centers_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class CenterNewView(APIView):
+    """获取"""
+
+    def get(self, request):
+        areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        return Response({"areas": areas})
+
+
+class CenterAddView(APIView):
+    """新增"""
+
+    def __init__(self, **kwargs):
+        super(CenterAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        user_now_iden = data['user_now_iden']
+        user_now = models.UserNow.objects.get(user_iden=user_now_iden)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        # center_iden = data['center_iden']
+        center_name = data['center_name']
+        area_name = data['area_name']
+        center_remarks = data['center_remarks']
+        if self.isExist(center_name, area_name):
+            Center.objects.create(center_name=center_name, area_name=area_name, center_remarks=center_remarks,
+                                  center_status=0, center_creator=self.user_now_name, center_creator_iden=user_now_iden)
+            logger.info('中心创建')
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def isExist(self, center_name, area_name):
+        try:
+            center = Center.objects.get(center_name=center_name, area_name=area_name)
+        except Center.DoesNotExist:
+            logger.info('中心不存在')
+            return True
+        else:
+            self.message = "中心名字和区域重复"
+            self.signal = 1
+            return False
+
+
+class CenterUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(CenterUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data['id']
+        center_name = data['center_name']
+        area_name = data['area_name']
+        center_remarks = data['center_remarks']
+        # center_creator = data['center_creator']
+        if self.isExist(center_name, area_name, id):
+            try:
+                Center.objects.filter(id=id).update(center_name=center_name, center_remarks=center_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def isExist(self, center_name, area_name, id):
+        try:
+            center = Center.objects.get(~Q(id=id), center_name=center_name, area_name=area_name)
+        except Center.DoesNotExist:
+            return True
+        else:
+            self.message = "中心名字和区域重复"
+            self.signal = 1
+            return False
+
+
+class CenterStatusView(APIView):
+    """状态变更"""
+
+    def post(self, request):
+        data = json.loads(self.request.body.decode("utf-8"))
+        id = data["id"]
+        center_status = data['center_status']
+        center = Center.objects.filter(id=id)
+        if center:
+            center.update(center_status=center_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到中心,状态更改失败"})
+
+
+# class CenterWareHousesView(APIView):
+#
+#     def get(self, request):
+#         centerWareHouses = models.CenterWareHouse.objects.all()
+#         if centerWareHouses:
+#             centerWareHouses_serializer = CenterWareHouseSerializer(centerWareHouses, many=True)
+#             return Response({"centerWareHouses": centerWareHouses_serializer.data})
+#
+#
+# class CenterWareHouseNewView(APIView):
+#     def get(self, request):
+#         brands = models.Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
+#         organizations = {}
+#         areas_name = models.Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+#         for area_name in areas_name:
+#             orga_center = []
+#             organization = models.Organization.objects.filter(area_name=area_name, orga_status=1).values_list(
+#                 'orga_name', flat=True)
+#             center = models.Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name',
+#                                                                                                     flat=True)
+#             orga_center.append(organization)
+#             orga_center.append(center)
+#             organizations[area_name] = orga_center
+#         return Response({"brands": brands, "organizations": organizations})
+#
+#
+# class CenterWareHouseAddView(APIView):
+#
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.message = "添加成功"
+#         self.signal = 0
+#
+#     def post(self, request):
+#         json_data = json.loads(self.request.body.decode("utf-8"))
+#         center_wh_iden = json_data['center_wh_iden']
+#         center_wh_name = json_data['center_wh_name']
+#         area_name = json_data['area_name']
+#         orga_name = json_data['orga_name']
+#         center_name = json_data['center_name']
+#         brand_name = json_data['brand_name']
+#         center_wh_remarks = json_data['center_wh_remarks']
+#         center_wh_status = json_data['center_wh_status']
+#         center_wh_creator = json_data['center_wh_creator']
+#         organization = models.Organization.objects.get(area_name=area_name, orga_name=orga_name)
+#         center = models.Center.objects.get(center_name=center_name)
+#         models.CenterWareHouse.objects.create(center_wh_iden=center_wh_iden, center_wh_name=center_wh_name,
+#                                               organization=organization, center=center,
+#                                               brand_name=brand_name,
+#                                               center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status,
+#                                               center_wh_creator=center_wh_creator)
+#         return Response({'message': self.message, 'signal': self.signal})
+#
+#
+# class CenterWareHouseUpdateView(APIView):
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self.message = "更新成功"
+#         self.signal = 0
+#
+#     def post(self, request):
+#         json_data = json.loads(self.request.body.decode("utf-8"))
+#         center_wh_iden = json_data['center_wh_iden']
+#         center_wh_remarks = json_data['center_wh_remarks']
+#         center_wh_status = json_data['center_wh_status']
+#         # center_wh_creator = json_data['center_wh_creator']
+#         try:
+#             models.CenterWareHouse.objects.filter(center_wh_iden=center_wh_iden, ).update(
+#                 center_wh_remarks=center_wh_remarks,
+#                 center_wh_status=center_wh_status, )
+#         except:
+#             self.message = "更新失败"
+#             self.signal = 1
+#         return Response({'message': self.message, 'signal': self.signal})
