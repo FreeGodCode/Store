@@ -4,8 +4,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
 from django.db.models import Max, Q
+from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class UserNewView(APIView):
         return HttpResponse({'max_identify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
 
 
-class UserAddView(APIVIew):
+class UserAddView(APIView):
     """新增"""
 
     def __init__(self, **kwargs):
@@ -274,7 +274,7 @@ class UserStatusView(APIView):
             return Response({'message': '未查询到用户，状态更该失败'})
 
 
-class UserView(APIView):
+class UsersView(APIView):
     """"""
 
     def get(self, request):
@@ -434,8 +434,8 @@ class RolePermissionAddSaveView(APIView):
             return Response({'message': '权限添加成功', 'signal': 0})
 
 
-class CustomerView(APIView):
-    """客户接口"""
+class CustomersView(APIView):
+    """获取"""
 
     def get(self, request):
         max_id = Customer.objects.all().aggregate(Max('customer_identify'))['customer_identify__max']
@@ -564,7 +564,7 @@ class CustomerStatusView(APIView):
             return Response({'message': '未查询到客户， 状态更改失败'})
 
 
-class OrganizationView(APIView):
+class OrganizationsView(APIView):
     """组织接口"""
 
     def get(self, request):
@@ -1280,7 +1280,7 @@ class SupplierStatusView(APIView):
             return Response({"message": "未查询到供应商,状态更改失败"})
 
 
-class MeasureView(APIView):
+class MeasuresView(APIView):
     """"""
 
     def get(self, request):
@@ -1480,7 +1480,7 @@ class MaterialTypeStatusView(APIView):
             return Response({"message": "未查询到物料类别,状态更改失败"})
 
 
-class MaterialView(APIView):
+class MaterialsView(APIView):
     """"""
 
     def get(self, request):

@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
 class UserNow(models.Model):
@@ -34,17 +35,17 @@ class UserProfile(AbstractUser):
     area = models.ForeignKey('Area', verbose_name='区域', related_name='area_user', on_delete=models.CASCADE)
     user_status = models.IntegerField(choices=USER_STATUS_CHOICES, default=0, verbose_name='用户状态')
     user_departments = models.CharField(max_length=50, null=True, verbose_name='部门')
-    user_roles = models.CharField(max_length=50, null=True, verbose_name='角色')
+    user_roles = models.ForeignKey('Role', verbose_name='角色', on_delete=models.CASCADE)
+    # user_roles = models.CharField(max_length=50, null=True, verbose_name='角色')
     user_creator = models.CharField(max_length=20, verbose_name='员工创建人名字')
     user_creator_identify = models.CharField(max_length=20, verbose_name='员工创建人工号')
-
     # user_creator = models.ForeignKey('UserProfile',verbose_name='用户',on_delete=models.CASCADE)
-
     user_created_at = models.DateTimeField(auto_now_add=True, verbose_name='员工创建时间')
 
     class Meta:
         db_table = 'db_user_profile'
         verbose_name = "员工"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.user_name
@@ -75,6 +76,7 @@ class Department(models.Model):
     class Meta:
         db_table = 'db_department'
         verbose_name = "部门"
+        verbose_name_plural = verbose_name
 
 
 class Role(models.Model):
@@ -98,6 +100,7 @@ class Role(models.Model):
     class Meta:
         db_table = 'db_role'
         verbose_name = "角色"
+        verbose_name_plural = verbose_name
 
 
 class Organization(models.Model):
@@ -111,7 +114,7 @@ class Organization(models.Model):
     org_name = models.CharField(max_length=20, verbose_name='组织名称')
     area_name = models.CharField(max_length=20, verbose_name='区域')
     org_status = models.IntegerField(choices=ORG_STATUS_CHOICES, default=0, verbose_name='组织状态')
-    # area = models.ForeignKey('Area', verbose_name='区域', related_name='area_orga', on_delete=models.CASCADE)
+    area = models.ForeignKey('Area', verbose_name='区域', related_name='area_org', on_delete=models.CASCADE)
     org_remarks = models.TextField(max_length=400, verbose_name='组织备注', null=True)
     org_creator = models.CharField(max_length=20, verbose_name='组织创建者名字')
     org_creator_identify = models.CharField(max_length=20, verbose_name='组织创建者工号')
@@ -121,6 +124,7 @@ class Organization(models.Model):
     class Meta:
         db_table = 'db_organization'
         verbose_name = "组织"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.org_name
@@ -139,6 +143,7 @@ class Area(models.Model):
     class Meta:
         db_table = 'db_area'
         verbose_name = "区域"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.area_name
@@ -174,7 +179,9 @@ class Brand(models.Model):
     brand_modified_at = models.DateTimeField(auto_now_add=True, verbose_name='品牌修改时间')
 
     class Meta:
+        db_table = 'db_brand'
         verbose_name = "品牌"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.brand_name
@@ -204,6 +211,7 @@ class TotalWareHouse(models.Model):
     class Meta:
         db_table = 'db_warehouse'
         verbose_name = "总仓"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.total_name
@@ -218,7 +226,8 @@ class CenterWareHouse(models.Model):
     id = models.AutoField(primary_key=True)
     center_wh_identify = models.CharField(max_length=6, unique=True, verbose_name='中心仓库编码')
     center_wh_name = models.CharField(max_length=20, verbose_name='中心仓库名字')
-    organization = models.ForeignKey('Organization', related_name='org_center_ware_house', verbose_name='组织', on_delete=models.CASCADE)
+    organization = models.ForeignKey('Organization', related_name='org_center_ware_house', verbose_name='组织',
+                                     on_delete=models.CASCADE)
     center = models.ForeignKey('Center', related_name='center_center_wh', verbose_name='所属中心', on_delete=models.CASCADE)
     center_wh_status = models.IntegerField(choices=CENTER_WH_STATUS_CHOICES, default=1, verbose_name='中心仓库状态')
     brand = models.ForeignKey('Brand', verbose_name='品牌', on_delete=models.CASCADE)
@@ -230,6 +239,7 @@ class CenterWareHouse(models.Model):
     class Meta:
         db_table = 'db_center_wh'
         verbose_name = "中心仓库"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.center_wh_name
@@ -259,6 +269,7 @@ class Supplier(models.Model):
     class Meta:
         db_table = 'db_supplier'
         verbose_name = "供应商"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.supply_name
@@ -285,6 +296,7 @@ class Center(models.Model):
     class Meta:
         db_table = 'db_center'
         verbose_name = "中心"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.center_name
@@ -316,6 +328,7 @@ class Customer(models.Model):
     class Meta:
         db_table = "db_customer"
         verbose_name = "客户"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.customer_name
@@ -347,6 +360,7 @@ class Measure(models.Model):
     class Meta:
         db_table = 'db_measure'
         verbose_name = "计量单位"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.meterage_name
@@ -370,6 +384,7 @@ class MaterialType(models.Model):
     class Meta:
         db_table = 'db_material_type'
         verbose_name = "物料类别"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.type_name
@@ -394,8 +409,8 @@ class Material(models.Model):
     material_model = models.CharField(max_length=30, verbose_name='物料型号')
     measure_name = models.CharField(max_length=20, verbose_name='计量单位名称')
     material_type_identify = models.CharField(max_length=30, verbose_name='分类编码')
-    # meterage = models.ForeignKey('Meterage', verbose_name='计量单位', related_name='meterage_material',
-    #                              on_delete=models.CASCADE)
+    measure = models.ForeignKey('Measure', verbose_name='计量单位',
+                                related_name='measure_material', on_delete=models.CASCADE)
     material_attr = models.IntegerField(choices=MATERIAL_DIMENSION_CHOICES, verbose_name='存货属性')
     material_status = models.IntegerField(choices=MATERIAL_STATUS_CHOICES, default=0, verbose_name='物料状态')
     material_creator = models.CharField(max_length=20, verbose_name='物料创建者名字')
@@ -406,6 +421,7 @@ class Material(models.Model):
     class Meta:
         db_table = 'db_material'
         verbose_name = "物料"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.material_name
