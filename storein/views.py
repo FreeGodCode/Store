@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from .serializer import BuyInStoreSerializer, BuyInStoreDetailSerializer
 from rest_framework.views import APIView
+from ..base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
+from . import models
 
 
 class BuyInStoresView(APIView):
@@ -22,17 +24,17 @@ class BuyInStoresView(APIView):
         permission = data['permission']
         print(permission)
         if permission == '1':
-            biss = BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
+            biss = models.BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
-            biss = BuyInStore.objects.filter(bis_creator_identify=user_identify,
-                                             organization__area_name=self.area_name).all()
+            biss = models.BuyInStore.objects.filter(bis_creator_identify=user_identify,
+                                                    organization__area_name=self.area_name).all()
         else:
-            biss1 = BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
-            biss2 = BuyInStore.objects.filter(bis_creator_identify=user_identify,
-                                              organization__area_name=self.area_name).all()
+            biss1 = models.BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
+            biss2 = models.BuyInStore.objects.filter(bis_creator_identify=user_identify,
+                                                     organization__area_name=self.area_name).all()
             biss = biss1 | biss2
         if biss:
-            biss_serializer = BuyInStoreSerializer(biss, many=True)
+            biss_serializer = models.BuyInStoreSerializer(biss, many=True)
             return Response({"biss": biss_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
@@ -68,8 +70,8 @@ class BuyInStoreNewView(APIView):
         except:
             return Response({"supply_names": supply_names, "org_ware_houses": org_ware_houses, "signal": 0})
         else:
-            bds = BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).all()
-            bds_serializer = BuyInStoreDSerializer(bds, many=True)
+            bds = models.BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).all()
+            bds_serializer = models.BuyInStoreDSerializer(bds, many=True)
             return Response(
                 {"supply_names": supply_names, "org_ware_houses": org_ware_houses, "bds": bds_serializer.data,
                  "signal": 1})
@@ -108,7 +110,7 @@ class BuyInStoreUpdateView(APIView):
             date_str = timezone.now().strftime("%Y-%m-%d")
             date = "".join(date_str.split("-"))
             pre_identify = "BI" + date
-            max_id = BuyInStore.objects.all().aggregate(Max('bis_serial'))['bis_serial__max']
+            max_id = models.BuyInStore.objects.all().aggregate(Max('bis_serial'))['bis_serial__max']
             if max_id:
                 bis_serial = str(int(max_id) + 1).zfill(4)
             else:
@@ -116,11 +118,11 @@ class BuyInStoreUpdateView(APIView):
             bis_new_identify = pre_identify + bis_serial
             self.bis_new_identify = bis_new_identify
             try:
-                if BuyInStore.objects.create(bis_identify=self.bis_new_identify, bis_serial=bis_serial,
-                                             organization=organization, totalwarehouse=in_ware_house,
-                                             supplier=supplier, bis_date=bis_date, bis_remarks=bis_remarks,
-                                             bis_status=0, bis_creator=self.user_now_name,
-                                             bis_creator_identify=user_identify):
+                if models.BuyInStore.objects.create(bis_identify=self.bis_new_identify, bis_serial=bis_serial,
+                                                    organization=organization, totalwarehouse=in_ware_house,
+                                                    supplier=supplier, bis_date=bis_date, bis_remarks=bis_remarks,
+                                                    bis_status=0, bis_creator=self.user_now_name,
+                                                    bis_creator_identify=user_identify):
                     self.message = "新建采购入库单成功"
                     self.signal = 0
                 else:
@@ -131,7 +133,7 @@ class BuyInStoreUpdateView(APIView):
                 self.message = "新建采购入库单失败"
                 self.signal = 1
         else:
-            bis = BuyInStore.objects.filter(bis_identify=bis_identify)
+            bis = models.BuyInStore.objects.filter(bis_identify=bis_identify)
             if bis:
                 bis.update(organization=organization, totalwarehouse=in_ware_house, supplier=supplier,
                            bis_date=bis_date, bis_remarks=bis_remarks)
@@ -188,8 +190,8 @@ class BuyInStoreDetailSaveView(APIView):
         data = json.loads(request.body.decode("utf-8"))
         bds = data["bds"]
         bis_identify = data["bis_identify"]
-        BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).delete()
-        bis = BuyInStore.objects.get(bis_identify=bis_identify)
+        models.BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).delete()
+        bis = models.BuyInStore.objects.get(bis_identify=bis_identify)
         for bd in bds:
             bd_identify = bd['bd_identify']
             material = Material.objects.get(material_identify=bd_identify)
@@ -201,9 +203,11 @@ class BuyInStoreDetailSaveView(APIView):
             pr_identify = bd['pr_identify']
 
             try:
-                if BuyInStoreDetail.objects.create(buy_in_store=bis, material=material, bd_paper_num=bd_paper_num,
-                                                   bd_real_num=bd_real_num, bd_unitPrice=bd_unitPrice, bd_sum=bd_sum,
-                                                   po_identify=po_identify, pr_identify=pr_identify):
+                if models.BuyInStoreDetail.objects.create(buy_in_store=bis, material=material,
+                                                          bd_paper_num=bd_paper_num,
+                                                          bd_real_num=bd_real_num, bd_unitPrice=bd_unitPrice,
+                                                          bd_sum=bd_sum,
+                                                          po_identify=po_identify, pr_identify=pr_identify):
                     pass
                 else:
                     self.message = "采购入库单详情保存失败"
@@ -238,7 +242,7 @@ class BuyInStoreDetailSubmitView(APIView):
         in_ware_house = data["in_ware_house"]
         org_name = data["org_name"]
         try:
-            if BuyInStore.objects.filter(bis_identify=bis_identify).update(bis_status=1):
+            if models.BuyInStore.objects.filter(bis_identify=bis_identify).update(bis_status=1):
                 pass
             else:
                 self.message = "采购入库单提交保存失败"
@@ -297,7 +301,7 @@ class BuyInStoreDeleteView(APIView):
         bis_identify = data['bis_identify']
 
         try:
-            if BuyInStore.objects.filter(bis_identify=bis_identify).delete()[0]:
+            if models.BuyInStore.objects.filter(bis_identify=bis_identify).delete()[0]:
                 pass
             else:
                 self.message = "删除采购入库单失败"
