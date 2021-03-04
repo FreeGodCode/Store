@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'rest_framework',  #  django-rest-framework
     'corsheaders',  # django-cors-headers
     'base',
+    'storein',
+
 
 
 ]
