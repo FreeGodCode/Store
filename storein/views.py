@@ -2,8 +2,8 @@ import json
 from django.shortcuts import render
 from .serializer import BuyInStoreSerializer, BuyInStoreDetailSerializer
 from rest_framework.views import APIView
-from ..base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
-from . import models
+from base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
+from storein import models
 
 
 class BuyInStoresView(APIView):
