@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  #  djangorestframework
+    'rest_framework',  #  django-rest-framework
     'corsheaders',  # django-cors-headers
     'base',
 
@@ -185,7 +185,7 @@ ROOT_URLCONF = 'store.urls'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # djangorestframework-jwt
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
