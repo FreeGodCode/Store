@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+# 重载系统的用户，让UserProfile生效,否则会报userprofile与Django自带的User类之间冲突
+AUTH_USER_MODEL = 'base.UserProfile'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -36,6 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',  #  django-rest-framework
+    'corsheaders',  # django-cors-headers
+    'base',
+    'storein',
+
+
 
 ]
 
@@ -98,7 +107,7 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
-
+# AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -137,11 +146,13 @@ STATIC_URL = '/static/'
 # CORS 跨域处理 cross-origin resource shareing
 # 配置允许跨站访问本站的地址
 CORS_ALLOW_CREDENTIALS = True  # 是否允许浏览器发送cookie
-CORS_ORIGIN_ALLOW_ALL = True  #
-# CORS_ORIGIN_WHITELIST = ()  # 允许所有
-CORS_ORIGIN_WHITELIST = (
-    'localhost:8000',
-)
+CORS_ORIGIN_ALLOW_ALL = True  #不使用白名单， 将接受所有来源， 默认为False
+CORS_ORIGIN_WHITELIST = []  # 允许所有
+# CORS_ORIGIN_WHITELIST = (
+#     'localhost:8000',
+#     '127.0.0.1:8000',
+#     '*'
+# )
 
 # config allow request methods 配置允许访问的方法
 CORS_ALLOW_METHODS = (
@@ -175,10 +186,11 @@ ROOT_URLCONF = 'store.urls'
 # rest_framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        # 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',  # djangorestframework-jwt
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ),
 }
 

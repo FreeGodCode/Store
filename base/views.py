@@ -4,8 +4,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
 from django.db.models import Max, Q
+from rest_framework.views import APIView
+from .models import UserProfile, UserNow, Measure,  Material, MaterialType, Center, Customer, CenterWareHouse,TotalWareHouse, Supplier, Department, Brand, Role, Organization, Area
+from .serializer import CustomerSerializer, CenterSerializer, CenterWareHouseSerializer, DepartmentSerializer, BrandSerializer, AreaSerializer, TotalWareHouseSerializer, MaterialSerializer, MeasureSerializer,MaterialTypeSerializer,SupplierSerializer, RoleSerializer, OrganizationSerializer,UserProfileSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -33,9 +35,9 @@ class LoginView(APIView):
     """登录"""
 
     def post(self, request):
-        json_data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = json_data['user_identify']
-        user_passwd = json_data['user_passwd']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
+        user_passwd = data['user_passwd']
         user_now = UserNow.objects.filter(user_identify=user_identify)
         logger.info('now user is user_now')
         if user_now:
@@ -86,8 +88,8 @@ class LoginExitView(APIView):
     """退出"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf_8'))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode('utf_8'))
+        user_identify = data['user_identify']
         try:
             user_now = UserNow.objects.get(user_identify=user_identify)
         except UserNow.DoesNotExist:
@@ -102,8 +104,8 @@ class UserView(APIView):
     """用户信息"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user = UserNow.objects.filter(user_identify=user_identify)
         if user:
             try:
@@ -127,7 +129,7 @@ class UserNewView(APIView):
         return HttpResponse({'max_identify': max_id, 'departments': departments, 'roles': roles, 'areas': areas})
 
 
-class UserAddView(APIVIew):
+class UserAddView(APIView):
     """新增"""
 
     def __init__(self, **kwargs):
@@ -137,8 +139,8 @@ class UserAddView(APIVIew):
         self.user_now_name = ''
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user = UserNow.objects.get(user_identify=user_identify)
         if user:
             self.user_now_name = user.user_name
@@ -158,7 +160,7 @@ class UserAddView(APIVIew):
                                                     user_phone_number=user_phone_number, email=email, is_active=0,
                                                     user_departments=user_departments, user_roles=user_roles,
                                                     user_creator=self.user_now_name,
-                                                    user_creator_identify=user_now_identify, area_name=area_name)
+                                                    user_creator_identify=user_identify, area_name=area_name)
                     # pass
         return HttpResponse({'message': self.message, 'signal': self.signal})
 
@@ -205,7 +207,7 @@ class UserUpdateView(APIView):
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         username = data['username']
         user_name = data['user_name']
@@ -263,7 +265,7 @@ class UserStatusView(APIView):
     """用户状态"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         is_active = data['is_active']
         username = data['username']
         user = UserProfile.objects.filter(username=username)
@@ -274,7 +276,7 @@ class UserStatusView(APIView):
             return Response({'message': '未查询到用户，状态更该失败'})
 
 
-class UserView(APIView):
+class UsersView(APIView):
     """"""
 
     def get(self, request):
@@ -336,6 +338,8 @@ class RolesView(APIView):
 
 
 class RoleAddView(APIView):
+    """添加"""
+
     def __init__(self, **kwargs):
         super(RoleAddView, self).__init__(**kwargs)
         self.message = '添加成功'
@@ -343,8 +347,8 @@ class RoleAddView(APIView):
         self.user_now_name = ''
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         role = data['role']
         role_permission = data['role_permission']
@@ -372,13 +376,15 @@ class RoleAddView(APIView):
 
 
 class RoleUpdateView(APIView):
+    """更新"""
+
     def __init__(self, **kwargs):
         super(RoleUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
         self.signal = 0
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role = data['role']
         role_permission = data['role_permission']
@@ -408,7 +414,7 @@ class RoleStatusView(APIView):
     """角色状态更新"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role_status = data['role_status']
         role = Role.objects.filter(id=id)
@@ -423,7 +429,7 @@ class RolePermissionAddSaveView(APIView):
     """角色权限添加"""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = json.loads(request.body.decode('utf-8'))
         id = data['id']
         role_permission = data['role_permission']
         try:
@@ -434,8 +440,8 @@ class RolePermissionAddSaveView(APIView):
             return Response({'message': '权限添加成功', 'signal': 0})
 
 
-class CustomerView(APIView):
-    """客户接口"""
+class CustomersView(APIView):
+    """获取所有客户"""
 
     def get(self, request):
         max_id = Customer.objects.all().aggregate(Max('customer_identify'))['customer_identify__max']
@@ -457,8 +463,8 @@ class CustomerAddView(APIView):
         self.user_now_name = ""
 
     def post(self, request):
-        data = json.loads(self.request.body.decode('utf-8'))
-        user_identify = data['user_now_identify']
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
         user_now = UserNOw.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -494,3 +500,1088 @@ class CustomerAddView(APIView):
             self.message = "客户名已经存在"
             self.signal = 1
             return False
+
+
+class CustomerUpdateView(APIView):
+    """更新客户"""
+
+    def __init__(self, **kwargs):
+        super(CustomerUpdateView, self).__init__(**kwargs)
+        self.message = '更新成功'
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        id = data['id']
+        customer_identify = data['customer_identify']
+        customer_name = data['customer_name']
+        customer_type = data['customer_type']
+        customer_remarks = data['customer_remarks']
+        customer_status = data['customer_status']
+        customer_creator = data['customer_creator']
+        if self.idCheck(customer_identify, id):
+            if self.nameCheck(customer_name, id):
+                try:
+                    Customer.objects.filter(id=id).update(customer_name=customer_name,
+                                                          customer_identify=customer_identify,
+                                                          customer_type=customer_type,
+                                                          customer_remarks=customer_remarks,
+                                                          customer_status=customer_status,
+                                                          customer_creator=customer_creator)
+                except:
+                    self.message = '更新失败'
+                    self.signal = 2
+
+        return Response({'messaage': self.message, 'signal': self.signal})
+
+    def idCheck(self, customer_identify, id):
+        try:
+            customer = Customer.objects.get(~Q(id=id), customer_identify=customer_identify)
+        except Customer.DoesNotExist:
+            return True
+        else:
+            self.message = '客户id已经存在'
+            self.signal = 1
+            return False
+
+    def nameCheck(self, customer_name, id):
+        try:
+            customer = Customer.objects.get(~Q(id=id), customer_name=customer_name)
+        except Customer.DoesNotExist:
+            return True
+        else:
+            self.message = '客户已经存在'
+            self.signal = 1
+            return False
+
+
+class CustomerStatusView(APIView):
+    """更新客户状态"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        customer_status = data['customer_status']
+        customer_identify = data['customer_identify']
+        customer = Customer.objects.filter(customer_identify=customer_identify)
+        if customer:
+            customer.update(customer_status=customer_status)
+            return Response({'message': '状态更新成功', 'signal': 0})
+        else:
+            return Response({'message': '未查询到客户， 状态更改失败'})
+
+
+class OrganizationsView(APIView):
+    """组织接口"""
+
+    def get(self, request):
+        max_id = Organization.objects.all().aggregate(Max('org_identify'))['org_identify__max']
+        organizations = Organization.objects.all()
+        if organizations:
+            organizations_serializer = OrganizationSerializer(organizations, many=True)
+            return Response({'max_identify': max_id, 'organizations': organizations_serializer.data})
+        else:
+            return Response({'message': '未查询到组织信息'})
+
+
+class OrganizationNewView(APIView):
+    """"""
+
+    def get(self, request):
+        areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        return Response({'areas': areas})
+
+
+class OrganizationAddView(APIView):
+    """新增组织"""
+
+    def __init__(self, **kwargs):
+        super(OrganizationAddView, self).__init__(**kwargs)
+        self.message = '添加成功'
+        self.signal = 0
+        self.use_now_name = ''
+
+    def post(self, request):
+        data = json.loads(request.body.decode('utf-8'))
+        user_identify = data['user_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        org_identify = data['org_identify']
+        org_name = data['org_name']
+        area_name = data['area_name']
+        org_remarks = data['org_remarks']
+        if self.idCheck(org_identify):
+            if self.nameCheck(org_name):
+                Organization.objects.create(org_identify=org_identify, org_name=org_name, area_name=area_name,
+                                            org_remarks=org_remarks, org_status=0, org_creator=self.user_now_name,
+                                            org_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, org_identify):
+        try:
+            org = Organization.objects.get(org_identify=org_identify)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, org_name):
+        try:
+            org_name = Organization.objects.get(org_name=org_name)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织名已经存在"
+            self.signal = 1
+            return False
+
+
+class OrganizationUpdateView(APIView):
+    """更新组织"""
+
+    def __init__(self, **kwargs):
+        super(OrganizationUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        org_identify = data['org_identify']
+        org_name = data['org_name']
+        org_remarks = data['org_remarks']
+        # org_creator = data['org_creator']
+        if self.idCheck(org_identify, id):
+            if self.nameCheck(org_name, id):
+                try:
+                    Organization.objects.filter(id=id).update(org_identify=org_identify, org_name=org_name,
+                                                              org_remarks=org_remarks, )
+                except:
+                    self.message = "更新失败"
+                    self.signal = 2
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, org_identify, id):
+        try:
+            org = Organization.objects.get(~Q(id=id), org_identify=org_identify)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, org_name, id):
+        try:
+            org = Organization.objects.get(~Q(id=id), org_name=org_name)
+        except Organization.DoesNotExist:
+            return True
+        else:
+            self.message = "组织名已经存在"
+            self.signal = 1
+            return False
+
+
+class OrganizationStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+
+        org_status = data['org_status']
+        org_identify = data['org_identify']
+
+        organization = Organization.objects.filter(org_identify=org_identify)
+
+        if organization:
+            organization.update(org_status=org_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到组织,状态更改失败"})
+
+
+class DepartmentsView(APIView):
+    """部门视图接口"""
+
+    def get(self, request):
+        dpms = Department.objects.all()
+        if dpms:
+            dpms_serializer = DepartmentSerializer(dpms, many=True)
+            return Response({"departments": dpms_serializer.data})
+        else:
+            return Response({"message": "未查询到部门信息"})
+
+
+class DepartmentAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(DepartmentAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        dpm_name = data['dpm_name']
+        dpm_remarks = data['dpm_remarks']
+        dpm_center = data['dpm_center']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            if self.nameCheck(dpm_name):
+                models.Department.objects.create(dpm_name=dpm_name, dpm_remarks=dpm_remarks, dpm_status=0,
+                                                 dpm_center=dpm_center, dpm_creator=self.user_now_name,
+                                                 dpm_creator_identify=user_identify)
+        else:
+            self.message = "用户未登录"
+            self.signal = 2
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, dpm_name):
+        try:
+            dpm = Department.objects.get(dpm_name=dpm_name)
+        except Department.DoesNotExist:
+            return True
+        else:
+            self.message = "角色已经存在"
+            self.signal = 1
+            return False
+
+
+class DepartmentUpdateView(APIView):
+    def __init__(self, **kwargs):
+        super(DepartmentUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        dpm_remarks = data['dpm_remarks']
+        dpm_name = data['dpm_name']
+        # dpm_status = data['dpm_status']
+        if self.nameCheck(dpm_name, id):
+            try:
+                models.Department.objects.filter(id=id).update(dpm_name=dpm_name, dpm_remarks=dpm_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name, id):
+        try:
+            dpm = Department.objects.get(~Q(id=id), dpm_name=name)
+        except Department.DoesNotExist:
+            return True
+        else:
+            self.message = "部门名字已经存在"
+            self.signal = 2
+            return False
+
+
+class DepartmentStatusView(APIView):
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        dpm_status = data['dpm_status']
+        # dpm_identify = data['dpm_identify']
+        dpm = Department.objects.filter(id=id)
+        if dpm:
+            dpm.update(dpm_status=dpm_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到部门,状态更改失败"})
+
+
+class BrandsView(APIView):
+    """品牌"""
+
+    def get(self, request):
+        brands = Brand.objects.all()
+        if brands:
+            brands_serializer = BrandSerializer(brands, many=True)
+            return Response({"brands": brands_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class BrandAddView(APIView):
+    """新增品牌"""
+
+    def __init__(self, **kwargs):
+        super(BrandAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        brand_name = data['brand_name']
+        brand_description = data['brand_description']
+        if self.nameCheck(brand_name):
+            Brand.objects.create(brand_name=brand_name, brand_status=0, brand_description=brand_description,
+                                 brand_creator=self.user_now_name, brand_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name):
+        try:
+            brand = Brand.objects.get(brand_name=name)
+        except Brand.DoesNotExist:
+            return True
+        else:
+            self.message = "品牌已经存在"
+            self.signal = 1
+            return False
+
+
+class BrandUpdateView(APIView):
+    """更新品牌信息"""
+
+    def __init__(self, **kwargs):
+        super(BrandUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        brand_name = data['brand_name']
+        brand_description = data['brand_description']
+        # brand_status = data['brand_status']
+        # brand_creator = data['brand_creator']
+        if self.nameCheck(brand_name, id):
+            try:
+                Brand.objects.filter(id=id).update(brand_name=brand_name, brand_description=brand_description, )
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def nameCheck(self, name, id):
+        try:
+            brand = Brand.objects.get(~Q(id=id), brand_name=name)
+        except Brand.DoesNotExist:
+            return True
+        else:
+            self.message = "品牌已经存在"
+            self.signal = 2
+            return False
+
+
+class BrandStatusView(APIView):
+    """状态变更"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        brand_status = data['brand_status']
+        brand = Brand.objects.filter(id=id)
+        if brand:
+            brand.update(brand_status=brand_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到品牌,状态更改失败"})
+
+
+class TotalWareHousesView(APIView):
+    """仓库接口"""
+
+    def get(self, request):
+        max_id = TotalWareHouse.objects.all().aggregate(Max('total_identify'))['total_identify__max']
+        totalWareHouses = TotalWareHouse.objects.all()
+        if totalWareHouses:
+            totalWareHouses_serializer = TotalWareHouseSerializer(totalWareHouses, many=True)
+            return Response({"max_identify": max_id, "totalWareHouses": totalWareHouses_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class TotalWareHouseNewView(APIView):
+    """"""
+
+    def get(self, request):
+        brands = Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
+        organizations = {}
+        centers = {}
+        areas_list = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        for area_name in areas_list:
+            organization = models.Organization.objects.filter(area_name=area_name, orga_status=1).values_list(
+                'org_name', flat=True)
+            center = Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name', flat=True)
+            organizations[area_name] = organization
+            centers[area_name] = center
+        return Response({"brands": brands, "organizations": organizations, "centers": centers, "areas": areas_list})
+
+
+class TotalWareHouseAddView(APIView):
+    """
+    这里绑定组织通过area_name和org_name再绑定
+    可以优化为传入前端org_identify ，传回的时候传identify
+    """
+
+    def __init__(self, **kwargs):
+        super(TotalWareHouseAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = models.UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        total_identify = data['total_identify']
+        total_name = data['total_name']
+        area_name = data['area_name']
+        org_name = data['org_name']
+        brand_name = data['brand_name']
+        total_belong_center = data['total_belong_center']
+        try:
+            total_belong_center_identify = models.Center.objects.get(center_name=total_belong_center, area_name=area_name)
+        except models.Center.DoesNotExist:
+            total_belong_center_identify = ""
+        else:
+            total_belong_center_identify = total_belong_center_identify.id
+
+        total_remarks = data['total_remarks']
+
+        organization = Organization.objects.get(area_name=area_name, org_name=org_name)
+        if self.idCheck(total_identify):
+            TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name, total_belong_center=total_belong_center, total_belong_center_identify=total_belong_center_identify, brand_name=brand_name, organization=organization, total_remarks=total_remarks, total_status=0, total_creator=self.user_now_name, total_creator_iden=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, total_identify):
+        try:
+            user = models.TotalWareHouse.objects.get(total_identify=total_identify)
+        except models.TotalWareHouse.DoesNotExist:
+            return True
+        else:
+            self.message = "仓库id已存在"
+            self.signal = 1
+            return False
+
+
+class TotalWareHouseUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(TotalWareHouseUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        total_identify = data['total_identify']
+        total_name = data['total_name']
+        brand_name = data['brand_name']
+        total_remarks = data['total_remarks']
+        if self.idCheck(total_identify, id):
+            try:
+                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name, brand_name=brand_name, total_remarks=total_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, total_identify, id):
+        try:
+            warehouse = TotalWareHouse.objects.get(~Q(id=id), total_identify=total_identify)
+        except TotalWareHouse.DoesNotExist:
+            return True
+        else:
+            self.message = "仓库id已存在"
+            self.signal = 1
+            return False
+
+
+class TotalWareHouseStatusView(APIView):
+    """状态变更"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        total_status = data['total_status']
+        total = TotalWareHouse.objects.filter(id=id)
+        if total:
+            total.update(total_status=total_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到仓库,状态更改失败"})
+
+
+class CentersView(APIView):
+    """中心接口"""
+
+    def get(self, request):
+        centers = Center.objects.all()
+        if centers:
+            centers_serializer = CenterSerializer(centers, many=True)
+            return Response({"centers": centers_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class CenterNewView(APIView):
+    """获取"""
+
+    def get(self, request):
+        areas = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        return Response({"areas": areas})
+
+
+class CenterAddView(APIView):
+    """新增"""
+
+    def __init__(self, **kwargs):
+        super(CenterAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = models.UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        # center_iden = data['center_iden']
+        center_name = data['center_name']
+        area_name = data['area_name']
+        center_remarks = data['center_remarks']
+        if self.isExist(center_name, area_name):
+            Center.objects.create(center_name=center_name, area_name=area_name, center_remarks=center_remarks,
+                                  center_status=0, center_creator=self.user_now_name, center_creator_iden=user_identify)
+            logger.info('中心创建')
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def isExist(self, center_name, area_name):
+        try:
+            center = Center.objects.get(center_name=center_name, area_name=area_name)
+        except Center.DoesNotExist:
+            logger.info('中心不存在')
+            return True
+        else:
+            self.message = "中心名字和区域重复"
+            self.signal = 1
+            return False
+
+
+class CenterUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(CenterUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        center_name = data['center_name']
+        area_name = data['area_name']
+        center_remarks = data['center_remarks']
+        # center_creator = data['center_creator']
+        if self.isExist(center_name, area_name, id):
+            try:
+                Center.objects.filter(id=id).update(center_name=center_name, center_remarks=center_remarks)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def isExist(self, center_name, area_name, id):
+        try:
+            center = Center.objects.get(~Q(id=id), center_name=center_name, area_name=area_name)
+        except Center.DoesNotExist:
+            return True
+        else:
+            self.message = "中心名字和区域重复"
+            self.signal = 1
+            return False
+
+
+class CenterStatusView(APIView):
+    """状态变更"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        center_status = data['center_status']
+        center = Center.objects.filter(id=id)
+        if center:
+            center.update(center_status=center_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到中心,状态更改失败"})
+
+
+class CenterWareHousesView(APIView):
+    """中心仓库接口"""
+
+    def get(self, request):
+        center_whs = CenterWareHouse.objects.all()
+        if center_whs:
+            center_whs_serializer = CenterWareHouseSerializer(center_whs, many=True)
+            return Response({"centerWareHouses": center_whs_serializer.data})
+
+
+class CenterWareHouseNewView(APIView):
+    """获取中心仓"""
+
+    def get(self, request):
+        brands = Brand.objects.filter(brand_status=1).values_list('brand_name', flat=True)
+        organizations = {}
+        areas_list = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
+        for area_name in areas_list:
+            org_center = []
+            organization = Organization.objects.filter(area_name=area_name, orga_status=1).values_list('org_name', flat=True)
+            center = Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name', flat=True)
+            org_center.append(organization)
+            org_center.append(center)
+            organizations[area_name] = org_center
+        return Response({"brands": brands, "organizations": organizations})
+
+
+class CenterWareHouseAddView(APIView):
+    """新增"""
+
+    def __init__(self, **kwargs):
+        super(CenterWareHouseAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        center_wh_identify = data['center_wh_identify']
+        center_wh_name = data['center_wh_name']
+        area_name = data['area_name']
+        org_name = data['org_name']
+        center_name = data['center_name']
+        brand_name = data['brand_name']
+        center_wh_remarks = data['center_wh_remarks']
+        center_wh_status = data['center_wh_status']
+        center_wh_creator = data['center_wh_creator']
+        organization = Organization.objects.get(area_name=area_name, org_name=org_name)
+        center = Center.objects.get(center_name=center_name)
+        CenterWareHouse.objects.create(center_wh_identify=center_wh_identify, center_wh_name=center_wh_name,
+                                       organization=organization, center=center, brand_name=brand_name,
+                                       center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status,
+                                       center_wh_creator=center_wh_creator)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class CenterWareHouseUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(CenterWareHouseUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        center_wh_identify = data['center_wh_identify']
+        center_wh_remarks = data['center_wh_remarks']
+        center_wh_status = data['center_wh_status']
+        try:
+            CenterWareHouse.objects.filter(center_wh_identify=center_wh_identify, ).update(
+                center_wh_remarks=center_wh_remarks, center_wh_status=center_wh_status, )
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class SuppliersView(APIView):
+    """供应商接口"""
+
+    def get(self, request):
+        max_id = Supplier.objects.all().aggregate(Max('supply_identify'))['supply_identify__max']
+        suppliers = Supplier.objects.all()
+        if suppliers:
+            suppliers_serializer = SupplierSerializer(suppliers, many=True)
+            return Response({"max_identify": max_id, "suppliers": suppliers_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class SupplierAddView(APIView):
+    """新增供应商"""
+
+    def __init__(self, **kwargs):
+        super(SupplierAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = models.UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        max_id = Supplier.objects.all().aggregate(Max('supply_identify'))['supply_identify__max']
+        if max_id:
+            supply_identify = str(int(max_id) + 1).zfill(5)
+        else:
+            supply_identify = "0100001"
+        supply_name = data['supply_name']
+        supply_type = data['supply_type']
+        supply_remarks = data['supply_remarks']
+        Supplier.objects.create(supply_identify=supply_identify, supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks, supply_creator=self.user_now_name, supply_creator_iden=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class SupplierUpdateView(APIView):
+    """更新"""
+
+    def __init__(self, **kwargs):
+        super(SupplierUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        supply_identify = data['supply_identify']
+        supply_name = data['supply_name']
+        supply_type = data['supply_type']
+        supply_remarks = data['supply_remarks']
+        supply_status = data['supply_status']
+        supply_creator = data['supply_creator']
+        try:
+            Supplier.objects.filter(supply_identify=supply_identify).update(supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks)
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class SupplierStatusView(APIView):
+    """状态更新"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        supply_status = data['supply_status']
+        supply_identify = data['supply_identify']
+        supplier = models.Supplier.objects.filter(supply_identify=supply_identify)
+        if supplier:
+            supplier.update(supply_status=supply_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到供应商,状态更改失败"})
+
+
+class MeasuresView(APIView):
+    """"""
+
+    def get(self, request):
+        max_id = Measure.objects.all().aggregate(Max('measure_identify'))['measure_identify__max']
+        measure = Measure.objects.all()
+        if measure:
+            measure_serializer = measureerializer(measure, many=True)
+            logger.info(measure_serializer.data)
+            # print(measure_serializer.data)
+            return Response({"max_identify": max_id, "measure": measure_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MeasureAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(MeasureAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_identify']
+        user_now = UserNow.objects.get(user_iden=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        measure_identify = data['measure_identify']
+        measure_name = data['measure_name']
+        measure_dimension = data['measure_dimension']
+
+        if self.idCheck(measure_identify):
+            if self.nameCheck(measure_name):
+                Measure.objects.create(measure_identify=measure_identify, measure_name=measure_name,
+                                               measure_dimension=measure_dimension, measure_status=0,
+                                               measure_creator=self.user_now_name,
+                                               measure_creator_iden=user_identify)
+
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, measure_identify):
+        try:
+            measure = Measure.objects.get(measure_identify=measure_identify)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位id已存在"
+            self.signal = 1
+            return False
+
+    def nameCheck(self, measure_name):
+        try:
+            measure = Measure.objects.get(measure_name=measure_name)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位名字已存在"
+            self.signal = 2
+            return False
+
+
+class MeasureUpdateView(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        measure_identify = data['measure_identify']
+        measure_name = data['measure_name']
+        measure_dimension = data['measure_dimension']
+
+        if self.idCheck(measure_identify, id):
+            try:
+                Measure.objects.filter(id=id).update(measure_name=measure_name,
+                                                             measure_dimension=measure_dimension)
+            except:
+                self.message = "更新失败"
+                self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+    def idCheck(self, measure_identify, id):
+        try:
+            measure = Measure.objects.get(~Q(id=id), measure_identify=measure_identify)
+        except Measure.DoesNotExist:
+            return True
+        else:
+            self.message = "计量单位id已存在"
+            self.signal = 1
+            return False
+
+
+class MeasureStatusView(APIView):
+    """"""
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        measure_status = data['measure_status']
+        id = data["id"]
+        measure = Measure.objects.filter(id=id)
+        if measure:
+            measure.update(measure_status=measure_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到计量单位,状态更改失败"})
+
+
+class MaterialTypesView(APIView):
+    """物料类别"""
+
+    def get(self, request):
+        max_id = MaterialType.objects.all().aggregate(Max('type_identify'))['type_identify__max']
+        material_types = MaterialType.objects.all()
+        if material_types:
+            print(max_id)
+            material_types_serializer = MaterialTypeSerializer(material_types, many=True)
+            return Response({"max_identify": max_id, "material_types": material_types_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MaterialTypeNewView(APIView):
+    pass
+
+
+class MaterialTypeAddView(APIView):
+
+    def __init__(self, **kwargs):
+        super(MaterialTypeAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_idenify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+        type_identify = data['type_identify']
+        type_name = data['type_name']
+
+        if self.idCheck(type_iden):
+            MaterialType.objects.create(type_iden=type_iden, type_name=type_name, type_status=0, type_creator=self.user_now_name, type_creator_identify=user_identify)
+
+        return Response({"message": self.message, "signal": self.signal})
+
+    def idCheck(self, type_identify):
+        try:
+            measure = MaterialType.objects.get(type_identify=type_identify)
+        except MaterialType.DoesNotExist:
+            return True
+        else:
+            self.message = "物料类别id已存在"
+            self.signal = 1
+            return False
+
+
+class MaterialTypeUpdateView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialTypeUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+
+        id = data['id']
+        type_identify = data['type_identify']
+        type_name = data['type_name']
+
+        try:
+            MaterialType.objects.filter(id=id).update(type_name=type_name)
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({"message": self.message, "signal": self.signal})
+
+
+class MaterialTypeStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        type_status = data['type_status']
+        id = data["id"]
+        type = MaterialType.objects.filter(id=id)
+        if type:
+            type.update(type_status=type_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到物料类别,状态更改失败"})
+
+
+class MaterialsView(APIView):
+    """"""
+
+    def get(self, request):
+        materials = Material.objects.all()
+        if materials:
+            materials_serializer = MaterialSerializer(materials, many=True)
+            return Response({"materials": materials_serializer.data})
+        else:
+            return Response({"message": "未查询到信息"})
+
+
+class MaterialNewView(APIView):
+    """物料获取"""
+
+    def get(self, request):
+        """物料类别及其名字和最大流水号编码"""
+        material_types = Material.objects.filter(type_status=1).values_list('type_identify', 'type_name')
+        measure = models.Meterage.objects.filter(measure_status=1).values_list('measure_dimension',   'measure_identify', 'measure_name')
+        return Response({"material_types": material_types, "measure": measure})
+
+
+class MaterialAddView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialAddView, self).__init__(**kwargs)
+        self.message = "添加成功"
+        self.signal = 0
+        self.user_now_name = ""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        user_identify = data['user_now_identify']
+        user_now = UserNow.objects.get(user_identify=user_identify)
+        if user_now:
+            self.user_now_name = user_now.user_name
+
+        material_name = data['material_name']
+        material_type_identify = data['material_type_identify']
+        material_specification = data['material_specification']
+        material_model = data['material_model']
+        measure_name = data['measure_name']
+        material_attr = data['material_attr']
+
+        max_id = Material.objects.filter(material_type_identify=material_type_identify).aggregate(Max('material_identify'))['material_identify__max']
+        if max_id:
+            material_identify = str(int(max_id) + 1)
+        else:
+            material_identify = material_type_identify + "00001"
+        Material.objects.create(material_identify=material_identify, material_name=material_name,
+                                       material_type_identify=material_type_identify,
+                                       material_specification=material_specification,
+                                       material_model=material_model, measure_name=measure_name,
+                                       material_attr=material_attr, material_status=0,
+                                       material_creator=self.user_now_name,
+                                       material_creator_identify=user_identify)
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class MaterialUpdateView(APIView):
+    """"""
+
+    def __init__(self, **kwargs):
+        super(MaterialUpdateView, self).__init__(**kwargs)
+        self.message = "更新成功"
+        self.signal = 0
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data['id']
+        material_identify = data['material_identify']
+        material_name = data['material_name']
+        material_specification = data['material_specification']
+        material_model = data['material_model']
+        measure_name = data['measure_name']
+        material_attr = data['material_attr']
+
+        try:
+            Material.objects.filter(id=id).update(material_name=material_name, material_specification=material_specification, material_model=material_model,   measure_name=measure_name, material_attr=material_attr, )
+        except:
+            self.message = "更新失败"
+            self.signal = 1
+        return Response({'message': self.message, 'signal': self.signal})
+
+
+class MaterialStatusView(APIView):
+    """"""
+
+    def post(self, request):
+        data = json.loads(request.body.decode("utf-8"))
+        id = data["id"]
+        material_status = data['material_status']
+        material = Material.objects.filter(id=id)
+        if material:
+            material.update(material_status=material_status)
+            return Response({"message": "状态更改成功", "signal": 0})
+        else:
+            return Response({"message": "未查询到物料,状态更改失败"})
