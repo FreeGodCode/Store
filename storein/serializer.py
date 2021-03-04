@@ -22,7 +22,7 @@ class BuyInStoreSerializer(serializers.ModelSerializer):
         )
 
 
-class BisDSerializer(serializers.ModelSerializer):
+class BuyInStoreDetailSerializer(serializers.ModelSerializer):
     bis_identify = serializers.CharField(source='buy_in_store.bis_identify')
     bd_identify = serializers.CharField(source='material.material_identify')
     bd_name = serializers.CharField(source='material.material_name')
