@@ -144,7 +144,7 @@ class BuyInStoreUpdateView(APIView):
         return Response({"message": self.message, "signal": self.signal, "bis_new_identify": self.bis_new_identify})
 
 
-class POChoiceView(APIView):
+class PurchaseOrderChoiceView(APIView):
     """"""
 
     def __init__(self, **kwargs):
