@@ -86,9 +86,7 @@ class PurchaseContractPayDetail(models.Model):
 
 
 class PurchaseOrder(models.Model):
-    """
-    采购订单
-    """
+    """采购订单"""
     PO_STATUS_CHOICES = (
         (0, '草稿'),
         (1, '已审批')
