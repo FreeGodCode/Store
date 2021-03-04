@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .serializer import BuyInStoreSerializer, BuyInStoreDetailSerializer
+from rest_framework.views import APIView
 
 
 class BuyInStoresView(APIView):

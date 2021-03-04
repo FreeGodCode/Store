@@ -9,92 +9,92 @@ from . import views
 
 urlpatterns = [
     # user
-    url(r'^login', views.LoginView.as_view(), name='login'),
-    url(r'^loginExit', views.LoginExitView.as_view(), name='loginExit'),
-    url(r'^user', views.UserView.as_view(), name='user'),
-    url(r'^userNew', views.UserNewView.as_view(), name='userNew'),
-    url(r'^userAdd', views.UserAddView.as_view(), name='userAdd'),
-    url(r'^userUpdate', views.UserUpdateView.as_view(), name='userUpdate'),
-    url(r'^userStatus', views.UserStatusView.as_view(), name='userStatus'),
-    url(r'^users', views.UsersView.as_view(), name='users'),
+    url('login', views.LoginView.as_view(), name='login'),
+    url('login_exit', views.LoginExitView.as_view(), name='login_exit'),
+    url('user', views.UserView.as_view(), name='user'),
+    url('user_new', views.UserNewView.as_view(), name='user_new'),
+    url('user_add', views.UserAddView.as_view(), name='user_add'),
+    url('user_update', views.UserUpdateView.as_view(), name='user_update'),
+    url('user_status', views.UserStatusView.as_view(), name='user_status'),
+    url('users', views.UsersView.as_view(), name='users'),
 
     # area
-    url(r'^areas', views.AreasView.as_view(), name='areas'),
+    url('areas', views.AreasView.as_view(), name='areas'),
 
     # role
-    url(r'^roles', views.RolesView.as_view(), name='roles'),
-    url(r'^roleAdd', views.RoleAddView.as_view(), name='roleAdd'),
-    url(r'^roleUpdate', views.RoleUpdateView.as_view(), name='roleUpdate'),
-    url(r'^roleStatus', views.RoleStatusView.as_view(), name='roleStatus'),
+    url('roles', views.RolesView.as_view(), name='roles'),
+    url('role_add', views.RoleAddView.as_view(), name='role_add'),
+    url('role_update', views.RoleUpdateView.as_view(), name='role_update'),
+    url('role_status', views.RoleStatusView.as_view(), name='role_status'),
 
     # department
-    url(r'^departments', views.DepartmentsView.as_view(), name='departments'),
-    url(r'^departmentAdd', views.DepartmentAddView.as_view(), name='departmentAdd'),
-    url(r'^departmentUpdate', views.DepartmentUpdateView.as_view(), name='departmentUpdate'),
-    url(r'^departmentStatus', views.DepartmentStatusView.as_view(), name='departmentStatus'),
-    url(r'^rolePermissionAddSave', views.RolePermissionAddSaveView.as_view(), name='rolePermissionAddSave'),
+    url('departments', views.DepartmentsView.as_view(), name='departments'),
+    url('department_add', views.DepartmentAddView.as_view(), name='department_add'),
+    url('department_update', views.DepartmentUpdateView.as_view(), name='department_update'),
+    url('department_status', views.DepartmentStatusView.as_view(), name='department_status'),
+    url('role_permission_add_save', views.RolePermissionAddSaveView.as_view(), name='role_permission_add_save'),
 
     # customer
-    url(r'^customers', views.CustomersView.as_view(), name='customers'),
-    url(r'^customerAdd', views.CustomerAddView.as_view(), name='customerAdd'),
-    url(r'^customerUpdate', views.CustomerUpdateView.as_view(), name='customerUpdate'),
-    url(r'^customerStatus', views.CustomerStatusView.as_view(), name='customerStatus'),
+    url('customers', views.CustomersView.as_view(), name='customers'),
+    url('customer_add', views.CustomerAddView.as_view(), name='customer_add'),
+    url('customer_update', views.CustomerUpdateView.as_view(), name='customer_update'),
+    url('customer_status', views.CustomerStatusView.as_view(), name='customer_status'),
 
     # organization
-    url(r'^organizations', views.OrganizationsView.as_view(), name='organizations'),
-    url(r'^organizationNew', views.OrganizationNewView.as_view(), name='organizationNew'),
-    url(r'^organizationAdd', views.OrganizationAddView.as_view(), name='organizationAdd'),
-    url(r'^organizationUpdate', views.OrganizationUpdateView.as_view(), name='organizationUpdate'),
-    url(r'^organizationStatus', views.OrganizationStatusView.as_view(), name='organizationStatus'),
+    url('organizations', views.OrganizationsView.as_view(), name='organizations'),
+    url('organization_new', views.OrganizationNewView.as_view(), name='organization_new'),
+    url('organization_add', views.OrganizationAddView.as_view(), name='organization_add'),
+    url('organization_update', views.OrganizationUpdateView.as_view(), name='organization_update'),
+    url('organization_status', views.OrganizationStatusView.as_view(), name='organization_status'),
 
     # brand
-    url(r'^brands', views.BrandsView.as_view(), name='brands'),
-    url(r'^brandAdd', views.BrandAddView.as_view(), name='brandAdd'),
-    url(r'^brandUpdate', views.BrandUpdateView.as_view(), name='brandUpdate'),
-    url(r'^brandStatus', views.BrandStatusView.as_view(), name='brandStatus'),
+    url('brands', views.BrandsView.as_view(), name='brands'),
+    url('brand_add', views.BrandAddView.as_view(), name='brand_add'),
+    url('brand_update', views.BrandUpdateView.as_view(), name='brand_update'),
+    url('brand_status', views.BrandStatusView.as_view(), name='brand_status'),
 
     # total warehouse
-    url(r'^totalWareHouses', views.TotalWareHousesView.as_view(), name='totalWareHouses'),
-    url(r'^totalWareHouseNew', views.TotalWareHouseNewView.as_view(), name='totalWareHouseNew'),
-    url(r'^totalWareHouseAdd', views.TotalWareHouseAddView.as_view(), name='totalWareHouseAdd'),
-    url(r'^totalWareHouseUpdate', views.TotalWareHouseUpdateView.as_view(), name='totalWareHouseUpdate'),
-    url(r'^totalWareHouseStatus', views.TotalWareHouseStatusView.as_view(), name='totalWareHouseUpdate'),
+    url('totalWareHouses', views.TotalWareHousesView.as_view(), name='totalWareHouses'),
+    url('totalWareHouse_new', views.TotalWareHouseNewView.as_view(), name='totalWareHouse_new'),
+    url('totalWareHouse_add', views.TotalWareHouseAddView.as_view(), name='totalWareHouse_add'),
+    url('totalWareHouse_update', views.TotalWareHouseUpdateView.as_view(), name='totalWareHouse_update'),
+    url('totalWareHouse_status', views.TotalWareHouseStatusView.as_view(), name='totalWareHouse_update'),
 
     # center
-    url(r'^centers', views.CentersView.as_view(), name='centers'),
-    url(r'^centerNew', views.CenterNewView.as_view(), name='centerNew'),
-    url(r'^centerAdd', views.CenterAddView.as_view(), name='centerAdd'),
-    url(r'^centerUpdate', views.CenterUpdateView.as_view(), name='centerUpdate'),
-    url(r'^centerStatus', views.CenterStatusView.as_view(), name='centerStatus'),
+    url('centers', views.CentersView.as_view(), name='centers'),
+    url('center_new', views.CenterNewView.as_view(), name='center_new'),
+    url('center_add', views.CenterAddView.as_view(), name='center_add'),
+    url('center_update', views.CenterUpdateView.as_view(), name='center_update'),
+    url('center_status', views.CenterStatusView.as_view(), name='center_status'),
 
     # center warehouse
-    # url(r'^centerWareHouses', views.CenterWareHousesView.as_view(), name='centerWareHouses'),
-    # url(r'^centerWareHouseNew', views.CenterWareHouseNewView.as_view(), name='centerWareHouseNew'),
-    # url(r'^centerWareHouseAdd', views.CenterWareHouseAddView.as_view(), name='centerWareHouseAdd'),
-    # url(r'^centerWareHouseUpdate', views.CenterWareHouseUpdateView.as_view(), name='centerWareHouseUpdate'),
+    # url('centerWareHouses', views.CenterWareHousesView.as_view(), name='centerWareHouses'),
+    # url('centerWareHouse_new', views.CenterWareHouseNewView.as_view(), name='centerWareHouse_new'),
+    # url('centerWareHouse_add', views.CenterWareHouseAddView.as_view(), name='centerWareHouse_add'),
+    # url('centerWareHouse_update', views.CenterWareHouseUpdateView.as_view(), name='centerWareHouse_update'),
 
     # supplier
-    url(r'^suppliers', views.SuppliersView.as_view(), name='suppliers'),
-    url(r'^supplierAdd', views.SupplierAddView.as_view(), name='supplierAdd'),
-    url(r'^supplierUpdate', views.SupplierUpdateView.as_view(), name='supplierUpdate'),
-    url(r'^supplierStatus', views.SupplierStatusView.as_view(), name='supplierStatus'),
+    url('suppliers', views.SuppliersView.as_view(), name='suppliers'),
+    url('supplier_add', views.SupplierAddView.as_view(), name='supplier_add'),
+    url('supplier_update', views.SupplierUpdateView.as_view(), name='supplier_update'),
+    url('supplier_status', views.SupplierStatusView.as_view(), name='supplier_status'),
 
     # measure
-    url(r'^measures', views.MeasuresView.as_view(), name='measures'),
-    url(r'^measureAdd', views.MeasureAddView.as_view(), name='measureAdd'),
-    url(r'^measureUpdate', views.MeasureUpdateView.as_view(), name='measureUpdate'),
-    url(r'^measureStatus', views.MeasureStatusView.as_view(), name='measureStatus'),
+    url('measures', views.MeasuresView.as_view(), name='measures'),
+    url('measure_add', views.MeasureAddView.as_view(), name='measure_add'),
+    url('measure_update', views.MeasureUpdateView.as_view(), name='measure_update'),
+    url('measure_status', views.MeasureStatusView.as_view(), name='measure_status'),
 
     # material type
-    url(r'^materialTypes', views.MaterialTypesView.as_view(), name='materialTypes'),
-    url(r'^materialTypeAdd', views.MaterialTypeAddView.as_view(), name='materialTypeAdd'),
-    url(r'^materialTypeUpdate', views.MaterialTypeUpdateView.as_view(), name='materialTypeUpdate'),
-    url(r'^materialTypeStatus', views.MaterialTypeStatusView.as_view(), name='materialTypeStatus'),
+    url('material_types', views.MaterialTypesView.as_view(), name='material_types'),
+    url('material_type_add', views.MaterialTypeAddView.as_view(), name='material_type_add'),
+    url('material_type_update', views.MaterialTypeUpdateView.as_view(), name='material_type_update'),
+    url('material_type_status', views.MaterialTypeStatusView.as_view(), name='material_type_status'),
 
     # material
-    url(r'^materials', views.MaterialsView.as_view(), name='materials'),
-    url(r'^materialNew', views.MaterialNewView.as_view(), name='materialNew'),
-    url(r'^materialAdd', views.MaterialAddView.as_view(), name='materialAdd'),
-    url(r'^materialUpdate', views.MaterialUpdateView.as_view(), name='materialUpdate'),
-    url(r'^materialStatus', views.MaterialStatusView.as_view(), name='materialStatus'),
+    url('materials', views.MaterialsView.as_view(), name='materials'),
+    url('material_new', views.MaterialNewView.as_view(), name='material_new'),
+    url('material_add', views.MaterialAddView.as_view(), name='material_add'),
+    url('material_update', views.MaterialUpdateView.as_view(), name='material_update'),
+    url('material_status', views.MaterialStatusView.as_view(), name='material_status'),
 ]

@@ -20,9 +20,9 @@ from django.conf.urls import url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^api/base/', include(('base.urls', 'base'), namespace='base')),
-    url(r'^api/store_in/', include(('storein.urls', 'base'), namespace='store_in')),
-    # url(r'^api/warehousing/', include(('warehousing.urls', 'base'), namespace='warehousing')),
-    # url(r'^api/manage/', include(('manage.urls', 'base'), namespace='manage')),
-    # url(r'^api/adjust/', include(('adjust.urls', 'base'), namespace='adjust')),
+    url('api/base/', include(('base.urls', 'base'), namespace='base')),
+    url('api/store_in/', include(('storein.urls', 'base'), namespace='store_in')),
+    # url('api/warehousing/', include(('warehousing.urls', 'base'), namespace='warehousing')),
+    # url('api/manage/', include(('manage.urls', 'base'), namespace='manage')),
+    # url('api/adjust/', include(('adjust.urls', 'base'), namespace='adjust')),
 ]

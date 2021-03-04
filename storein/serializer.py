@@ -4,7 +4,7 @@
 # @Time:  2021/3/4 下午9:18
 # @Description:
 from rest_framework import serializers
-from .models import BuyInStore, BuyInStoreDetail
+from . import models
 
 
 class BuyInStoreSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class BuyInStoreSerializer(serializers.ModelSerializer):
     # total_name = serializers.CharField(source='totalwarehouse.total_name')
 
     class Meta:
-        model = BuyInStore
+        model = models.BuyInStore
         fields = (
             'id', 'org_name', 'area_name', 'total_name', 'supply_name', 'supply_identify', 'bis_identify', 'bis_date', 'bis_remarks', 'bis_status', 'bis_creator', 'bis_creator_identify', 'bis_created_at'
         )
@@ -31,7 +31,7 @@ class BuyInStoreDetailSerializer(serializers.ModelSerializer):
     bd_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
-        model = BuyInStoreDetail
+        model = models.BuyInStoreDetail
         fields = (
             'id', 'bis_identify', 'bd_identify', 'bd_name', 'bd_specification', 'bd_model', 'bd_measure', 'bd_paper_num', 'bd_real_num', 'bd_unitPrice', 'bd_sum', 'po_identify', 'pr_identify'
         )

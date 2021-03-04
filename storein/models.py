@@ -63,8 +63,8 @@ class OtherStoreIn(models.Model):
     osi_identify = models.CharField(max_length=15, verbose_name='其它入库单编号')
     osi_serial = models.CharField(max_length=4, verbose_name='其它入库单流水号')
     organization = models.ForeignKey('base.Organization', verbose_name='组织', related_name='org_osi', on_delete=models.CASCADE)
-    transfer = models.OneToOneField('Transfer', verbose_name='转库单', on_delete=models.CASCADE)  # 如果不行保存为转库单identify
-    inventory = models.OneToOneField('Inventory', verbose_name='库存盘点单', on_delete=models.CASCADE)  # 同上
+    # transfer = models.OneToOneField('Transfer', verbose_name='转库单', on_delete=models.CASCADE)  # 如果不行保存为转库单identify
+    # inventory = models.OneToOneField('Inventory', verbose_name='库存盘点单', on_delete=models.CASCADE)  # 同上
     osi_wh = models.CharField(max_length=15, verbose_name='其它入库仓库名字')
     osi_type = models.IntegerField(choices=OSI_TYPE_CHOICES, verbose_name='其它入库单类型')
     osi_date = models.DateField(auto_now_add=True, verbose_name='其它出库日期')
@@ -87,7 +87,7 @@ class OtherStoreIn(models.Model):
 class OtherStoreInDetail(models.Model):
     """其它入库单明细"""
     id = models.AutoField(primary_key=True)
-    other_si = models.ForeignKey('OtherSi', verbose_name='其它入库单', related_name='osi_osid', on_delete=models.CASCADE)
+    other_si = models.ForeignKey('OtherStoreIn', verbose_name='其它入库单', related_name='osi_osid', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_osid', on_delete=models.CASCADE)
     osid_paper_num = models.IntegerField(verbose_name='应收数量')
     osid_real_num = models.IntegerField(verbose_name='实收数量')

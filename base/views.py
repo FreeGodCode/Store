@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Max, Q
 from rest_framework.views import APIView
+from .models import UserProfile, UserNow, Measure,  Material, MaterialType, Center, Customer, CenterWareHouse,TotalWareHouse, Supplier, Department, Brand, Role, Organization, Area
+from .serializer import CustomerSerializer, CenterSerializer, CenterWareHouseSerializer, DepartmentSerializer, BrandSerializer, AreaSerializer, TotalWareHouseSerializer, MaterialSerializer, MeasureSerializer,MaterialTypeSerializer,SupplierSerializer, RoleSerializer, OrganizationSerializer,UserProfileSerializer
 
 logger = logging.getLogger(__name__)
 
