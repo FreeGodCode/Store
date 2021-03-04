@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# 重载系统的用户，让UserProfile生效
+# 重载系统的用户，让UserProfile生效,否则会报userprofile与Django自带的User类之间冲突
 AUTH_USER_MODEL = 'base.UserProfile'
 
 # Application definition
@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'corsheaders',
+    'rest_framework',  #  djangorestframework
+    'corsheaders',  # django-cors-headers
     'base',
 
 
@@ -144,8 +144,8 @@ STATIC_URL = '/static/'
 # CORS 跨域处理 cross-origin resource shareing
 # 配置允许跨站访问本站的地址
 CORS_ALLOW_CREDENTIALS = True  # 是否允许浏览器发送cookie
-CORS_ORIGIN_ALLOW_ALL = True  #
-CORS_ORIGIN_WHITELIST = ()  # 允许所有
+CORS_ORIGIN_ALLOW_ALL = True  #不使用白名单， 将接受所有来源， 默认为False
+CORS_ORIGIN_WHITELIST = []  # 允许所有
 # CORS_ORIGIN_WHITELIST = (
 #     'localhost:8000',
 #     '127.0.0.1:8000',

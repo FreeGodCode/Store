@@ -336,6 +336,8 @@ class RolesView(APIView):
 
 
 class RoleAddView(APIView):
+    """添加"""
+
     def __init__(self, **kwargs):
         super(RoleAddView, self).__init__(**kwargs)
         self.message = '添加成功'
@@ -372,6 +374,8 @@ class RoleAddView(APIView):
 
 
 class RoleUpdateView(APIView):
+    """更新"""
+
     def __init__(self, **kwargs):
         super(RoleUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
@@ -435,7 +439,7 @@ class RolePermissionAddSaveView(APIView):
 
 
 class CustomersView(APIView):
-    """获取"""
+    """获取所有客户"""
 
     def get(self, request):
         max_id = Customer.objects.all().aggregate(Max('customer_identify'))['customer_identify__max']
