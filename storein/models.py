@@ -30,7 +30,7 @@ class BuyInStore(models.Model):
         return self.bis_identify
 
 
-class BisDetail(models.Model):
+class BuyInStoreDetail(models.Model):
     """采购入库单明细"""
     id = models.AutoField(primary_key=True)
     buy_in_store = models.ForeignKey('BuyInStore', verbose_name='采购入库单', related_name='bis_bd', on_delete=models.CASCADE)
@@ -41,7 +41,6 @@ class BisDetail(models.Model):
     bd_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税总额')
     po_identify = models.CharField(max_length=15, verbose_name='采购订单号')
     pr_identify = models.CharField(max_length=15, verbose_name='请购订单号')
-
     # bd_remarks = models.TextField(max_length=200, verbose_name='采购入库单明细备注')
 
     class Meta:
@@ -85,7 +84,7 @@ class OtherStoreIn(models.Model):
         return self.osi_identify
 
 
-class OsiDetail(models.Model):
+class OtherStoreInDetail(models.Model):
     """其它入库单明细"""
     id = models.AutoField(primary_key=True)
     other_si = models.ForeignKey('OtherSi', verbose_name='其它入库单', related_name='osi_osid', on_delete=models.CASCADE)
