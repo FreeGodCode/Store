@@ -45,7 +45,9 @@ class BisDetail(models.Model):
     # bd_remarks = models.TextField(max_length=200, verbose_name='采购入库单明细备注')
 
     class Meta:
+        db_table = 'db_bis_detail'
         verbose_name = "采购入库单明细"
+        verbose_name_plural = verbose_name
 
 
 class OtherStoreIn(models.Model):
@@ -76,16 +78,15 @@ class OtherStoreIn(models.Model):
 
     class Meta:
         db_table = 'db_other_storein'
-        verbose_name = "其它出库单"
+        verbose_name = "其它入库单"
+        verbose_name_plural = verbose_name
 
     def __str__(self):
         return self.osi_identify
 
 
 class OsiDetail(models.Model):
-    """
-    其它入库单明细
-    """
+    """其它入库单明细"""
     id = models.AutoField(primary_key=True)
     other_si = models.ForeignKey('OtherSi', verbose_name='其它入库单', related_name='osi_osid', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_osid', on_delete=models.CASCADE)
@@ -93,3 +94,8 @@ class OsiDetail(models.Model):
     osid_real_num = models.IntegerField(verbose_name='实收数量')
     osid_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税单价')
     osid_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税总额')
+
+    class Meta:
+        db_table = 'db_other_storein_detail'
+        verbose_name = "其它入库单详情"
+        verbose_name_plural = verbose_name
