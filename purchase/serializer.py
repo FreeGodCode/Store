@@ -8,6 +8,7 @@ from . import models
 
 
 class PurchaseContractSerializer(serializers.ModelSerializer):
+    """采购合同序列化器"""
     org_name = serializers.CharField(source='organization.org_name')
     area_name = serializers.CharField(source='organization.area_name')
     supply_name = serializers.CharField(source='supplier.supply_name')
@@ -21,7 +22,8 @@ class PurchaseContractSerializer(serializers.ModelSerializer):
         )
 
 
-class CdDetailSerializer(serializers.ModelSerializer):
+class PurchaseContractDetailSerializer(serializers.ModelSerializer):
+    """采购合同详情"""
     pc_identify = serializers.CharField(source='purchase_contract.pc_identify')
     cd_identify = serializers.CharField(source='material.material_identify')
     cd_name = serializers.CharField(source='material.material_name')
@@ -30,7 +32,7 @@ class CdDetailSerializer(serializers.ModelSerializer):
     cd_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
-        model = models.CdDetail
+        model = models.PurchaseContractDetail
         fields = (
             'id', 'cd_identify', 'pc_identify', 'cd_name', 'cd_specification',  'cd_model', 'cd_measure', 'cd_num',
             'cd_taxRate', 'cd_tax_unitPrice', 'cd_unitPrice', 'cd_tax_sum', 'cd_sum', 'cd_tax_price', 'cd_pr_identify',
@@ -38,17 +40,19 @@ class CdDetailSerializer(serializers.ModelSerializer):
         )
 
 
-class CdPayDetailSerializer(serializers.ModelSerializer):
+class PurchaseContractPayDetailSerializer(serializers.ModelSerializer):
+    """采购合同付款详情"""
     pc_identify = serializers.CharField(source='purchase_contract.pc_identify')
 
     class Meta:
-        model = models.CdPayDetail
+        model = models.PurchaseContractPayDetail
         fields = (
             'id', 'pc_identify', 'pay_batch', 'pay_rate', 'pay_price', 'pay_planDate', 'pay_prepay', 'pay_remarks'
         )
 
 
 class PurchaseOrderSerializer(serializers.ModelSerializer):
+    """采购订单"""
     org_name = serializers.CharField(source='organization.org_name')
     area_name = serializers.CharField(source='organization.area_name')
     supply_name = serializers.CharField(source='supplier.supply_name')
@@ -62,7 +66,8 @@ class PurchaseOrderSerializer(serializers.ModelSerializer):
         )
 
 
-class OrDSerializer(serializers.ModelSerializer):
+class OrderDetailSerializer(serializers.ModelSerializer):
+    """订单详情"""
     po_identify = serializers.CharField(source='purchase_order.po_identify')
     po_date = serializers.DateTimeField(source='purchase_order.po_date')
     od_identify = serializers.CharField(source='material.material_identify')
@@ -72,7 +77,7 @@ class OrDSerializer(serializers.ModelSerializer):
     od_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
-        model = models.OrDetail
+        model = models.OrderDetail
         fields = (
             'id', 'po_identify', 'po_date', 'od_identify', 'od_name', 'od_specification',  'od_model', 'od_measure',
             'od_num', 'od_taxRate', 'od_tax_unitPrice', 'od_unitPrice', 'od_tax_sum', 'od_sum', 'od_tax_price',
@@ -81,6 +86,7 @@ class OrDSerializer(serializers.ModelSerializer):
 
 
 class OrderDetailToBuyInStoreDetailSerializer(serializers.ModelSerializer):
+    """采购订单转化为入库订单详情"""
     po_identify = serializers.CharField(source='purchase_order.po_identify')
     po_date = serializers.DateTimeField(source='purchase_order.po_date')
     pr_identify = serializers.CharField(source='od_pr_identify')
