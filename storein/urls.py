@@ -6,7 +6,7 @@
 from django.conf.urls import url
 from . import views
 
-patterns = [
+urlpatterns = [
     url(r'^buy_in_stores', views.BuyInStoresView.as_view(), name='buy_in_stores'),
     url(r'^buy_in_store_new', views.BuyInStoreNewView.as_view(), name='buy_in_store_new'),
     url(r'^buy_in_store_update', views.BuyInStoreUpdateView.as_view(), name='buy_in_store_update'),
