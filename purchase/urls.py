@@ -17,7 +17,7 @@ urlpatterns = [
 
     url('purchase_orders', views.PurchaseOrdersView.as_view(), name='purchase_orders'),
     url('purchase_order_new', views.PurchaseOrderNewView.as_view(), name='purchase_order_new'),
-    url('prChoice', views.PrChoiceView.as_view(), name='prChoice'),
+    url('purchase_contract_choice', views.PurchaseContractChoiceView.as_view(), name='purchase_contract_choice'),
     # url('purchase_order_newByPurchaseContract', views.PurchaseOrderNewByPurchaseContractView.as_view(), name='purchase_order_newByPurchaseContract'),
     url('purchase_contract_choice', views.PurchaseContractChoiceView.as_view(), name='purchase_contract_choice'),
     url('purchase_order_update', views.PurchaseOrderUpdateView.as_view(), name='purchase_order_update'),

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.db.models import Q, Max
 from django.utils import timezone
 from django.shortcuts import render, redirect
-from ..base.models import UserNow, UserProfile, Organization, Supplier, Material, Department
+from base.models import UserNow, UserProfile, Organization, Supplier, Material, Department
 
 from . import models
 from .serializer import PurchaseRequestSerializer,  PurchaseRequestDetailSerializer
