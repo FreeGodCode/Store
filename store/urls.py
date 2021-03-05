@@ -26,5 +26,5 @@ urlpatterns = [
     url('api/purchaseRequest/', include(('purchaseRequest.urls', 'base'), namespace='purchaseRequest')),
     # url('api/warehousing/', include(('warehousing.urls', 'base'), namespace='warehousing')),
     # url('api/manage/', include(('manage.urls', 'base'), namespace='manage')),
-    # url('api/adjust/', include(('adjust.urls', 'base'), namespace='adjust')),
+    url('api/store_adjust/', include(('storeAdjust.urls', 'base'), namespace='store_adjust')),
 ]
