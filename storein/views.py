@@ -1,8 +1,9 @@
+import json
 from django.shortcuts import render
 from .serializer import BuyInStoreSerializer, BuyInStoreDetailSerializer
 from rest_framework.views import APIView
-from ..base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
-from . import models
+from base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
+from storein import models
 
 
 class BuyInStoresView(APIView):
@@ -15,7 +16,7 @@ class BuyInStoresView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_identify']
+        user_identify = data['user_now_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -50,7 +51,7 @@ class BuyInStoreNewView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_identify']
+        user_identify = data['user_now_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -90,7 +91,7 @@ class BuyInStoreUpdateView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_identify']
+        user_identify = data['user_now_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
@@ -143,7 +144,7 @@ class BuyInStoreUpdateView(APIView):
         return Response({"message": self.message, "signal": self.signal, "bis_new_identify": self.bis_new_identify})
 
 
-class POChoiceView(APIView):
+class PurchaseOrderChoiceView(APIView):
     """"""
 
     def __init__(self, **kwargs):
@@ -154,7 +155,7 @@ class POChoiceView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        user_identify = data['user_identify']
+        user_identify = data['user_now_identify']
         user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
