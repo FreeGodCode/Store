@@ -62,7 +62,7 @@ class Transfer(models.Model):
     # str_identify = models.CharField(max_length=15, verbose_name='转库申请单编号', null=True)  # 转库申请单编号，如果为空就为新增
     st_to_house = models.CharField(max_length=20, verbose_name='转入仓库名字')
     st_from_house = models.CharField(max_length=20, verbose_name='转出仓库名字')
-    st_date = models.DateTimeField(default=datetime.now, verbose_name='转库日期')
+    st_date = models.DateTimeField(default=datetime.datetime.now, verbose_name='转库日期')
     st_status = models.IntegerField(choices=ST_STATUS_CHOICES, default=0, verbose_name='转库单状态')
     st_creator = models.CharField(max_length=20, verbose_name='转库单创建者名字')
     st_creator_identify = models.CharField(max_length=20, verbose_name='转库单创建者编号')
