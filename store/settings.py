@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'purchase',  # 采购
     'purchaseRequest',  # 请购单
     'storeAdjust',  # 仓库调整
+    'sell',
+
 
 ]
 
