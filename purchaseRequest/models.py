@@ -15,7 +15,7 @@ class PurchaseRequest(models.Model):
     pr_serial = models.CharField(max_length=4, verbose_name='请购单流水')
     organization = models.ForeignKey('base.Organization', related_name='org_pr', verbose_name='组织', on_delete=models.CASCADE)
     pr_type = models.CharField(max_length=20, verbose_name='需求类型')
-    # material_type = models.ForeignKey('base.MaterialType', verbose_name='物料类别', on_delete=models.CASCADE)
+    material_type = models.ForeignKey('base.MaterialType', verbose_name='物料类别', on_delete=models.CASCADE)
     pr_department = models.CharField(max_length=20, verbose_name='请购部门')
     pr_date = models.DateTimeField(default=datetime.datetime.now, verbose_name='请购日期')
     pr_remarks = models.TextField(max_length=400, verbose_name='请购备注', null=True)
@@ -45,7 +45,7 @@ class PurchaseRequestDetail(models.Model):
         (1, '已使用')
     )
     id = models.AutoField(primary_key=True)
-    # pr_identify = models.CharField(max_length=15,verbose_name="请购单编号")
+    pr_identify = models.CharField(max_length=15,verbose_name="请购单编号")
     purchase_request = models.ForeignKey('PurchaseRequest', related_name='pr_prd', verbose_name='请购单', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_prd', on_delete=models.CASCADE)  # attention
     prd_num = models.IntegerField(verbose_name='请购数量')
