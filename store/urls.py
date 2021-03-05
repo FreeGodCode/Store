@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url('api/base/', include(('base.urls', 'base'), namespace='base')),
     url('api/store_in/', include(('storein.urls', 'base'), namespace='store_in')),
+    url('api/purchase/', include(('purchase.urls', 'base'), namespace='purchase')),
+    url('api/purchaseRequest/', include(('purchaseRequest.urls', 'base'), namespace='purchaseRequest')),
     # url('api/warehousing/', include(('warehousing.urls', 'base'), namespace='warehousing')),
     # url('api/manage/', include(('manage.urls', 'base'), namespace='manage')),
     # url('api/adjust/', include(('adjust.urls', 'base'), namespace='adjust')),

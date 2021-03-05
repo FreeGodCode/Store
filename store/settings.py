@@ -39,12 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',  #  django-rest-framework
+    'rest_framework',  # django-rest-framework
     'corsheaders',  # django-cors-headers
     'base',
     'storein',
-
-
+    'purchase',  # 采购
+    'purchaseRequest',  # 请购单
 
 ]
 
