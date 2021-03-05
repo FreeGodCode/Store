@@ -3,15 +3,16 @@
 # @FileName: urls.py
 # @Time:  2021/3/4 下午11:56
 # @Description:
+from django.conf.urls import url
 from . import views
 
 urlpatterns = [
     url('purchase_contracts', views.PurchaseContractsView.as_view(), name='purchase_contracts'),
     url('purchase_contract_new', views.PurchaseContractNewView.as_view(), name='purchase_contract_new'),
     url('purchase_contract_update', views.PurchaseContractUpdateView.as_view(), name='purchase_contract_update'),
-    url('cdDetailSave', views.CdDetailSaveView.as_view(), name='cdDetailSave'),
-    url('cdDetailSubmit', views.CdDetailSubmitView.as_view(), name='cdDetailSubmit'),
-    url('cdDetailNew', views.CdDetailNewView.as_view(), name='cdDetailNew'),
+    url('purchase_contract_detail_save', views.PurchaseContractDetailSaveView.as_view(), name='purchase_contract_detail_save'),
+    url('purchase_contract_detail_submit', views.PurchaseContractDetailSubmitView.as_view(), name='purchase_contract_detail_submit'),
+    url('purchase_contract_detail_new', views.PurchaseContractDetailNewView.as_view(), name='purchase_contract_detail_new'),
     url('purchase_contract_delete', views.PurchaseContractDeleteView.as_view(), name='purchase_contract_delete'),
 
     url('purchase_orders', views.PurchaseOrdersView.as_view(), name='purchase_orders'),
