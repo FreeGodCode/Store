@@ -34,31 +34,31 @@ class PurchaseContract(models.Model):
 
 class PurchaseContractDetail(models.Model):
     """合同物料明细"""
-    CD_USE_STATUS_CHOICES = (
+    PCD_USE_STATUS_CHOICES = (
         (0, '未使用'),
         (1, '已使用')
     )
     id = models.AutoField(primary_key=True)
-    purchase_contract = models.ForeignKey('PurchaseContract', verbose_name='采购合同', related_name='pc_cd', on_delete=models.CASCADE)
-    material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_cd', on_delete=models.CASCADE)
-    cd_num = models.IntegerField(verbose_name='物料数量')
-    cd_taxRate = models.IntegerField(default=13, verbose_name='税率', null=True)
-    cd_tax_unitPrice = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='含税单价', null=True)
-    cd_unitPrice = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税单价', null=True)
-    cd_tax_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='含税总额', null=True)
-    cd_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税总额', null=True)
-    cd_tax_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='税额', null=True)
-    cd_pr_identify = models.CharField(max_length=15, verbose_name='请购单编号')
-    cd_prd_remarks = models.TextField(max_length=400, verbose_name='物料备注', null=True)
-    cd_used = models.IntegerField(choices=CD_USE_STATUS_CHOICES, default=0, verbose_name='明细单是否使用')
+    purchase_contract = models.ForeignKey('PurchaseContract', verbose_name='采购合同', related_name='pc_pcd', on_delete=models.CASCADE)
+    material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_pcd', on_delete=models.CASCADE)
+    pcd_num = models.IntegerField(verbose_name='物料数量')
+    pcd_taxRate = models.IntegerField(default=13, verbose_name='税率', null=True)
+    pcd_tax_unitPrice = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='含税单价', null=True)
+    pcd_unitPrice = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税单价', null=True)
+    pcd_tax_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='含税总额', null=True)
+    pcd_sum = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='无税总额', null=True)
+    pcd_tax_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='税额', null=True)
+    pcd_pr_identify = models.CharField(max_length=15, verbose_name='请购单编号')
+    pcd_prd_remarks = models.TextField(max_length=400, verbose_name='物料备注', null=True)
+    pcd_used = models.IntegerField(choices=PCD_USE_STATUS_CHOICES, default=0, verbose_name='明细单是否使用')
 
     class Meta:
-        db_table = 'db_pcd'
+        db_table = 'db_purchase_contract_detail'
         verbose_name = "合同物料明细"
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.cd_num
+        return self.pcd_num
 
 
 class PurchaseContractPayDetail(models.Model):
@@ -77,7 +77,7 @@ class PurchaseContractPayDetail(models.Model):
     pay_remarks = models.TextField(max_length=400, verbose_name='付款备注', null=True)
 
     class Meta:
-        db_table = 'db_cdpd'
+        db_table = 'db_purchase_contract_pay_detail'
         verbose_name = "合同付款协议"
         verbose_name_plural = verbose_name
 
@@ -108,6 +108,7 @@ class PurchaseOrder(models.Model):
     po_created_at= models.DateTimeField(auto_now_add=True, verbose_name='采购订单创建时间')
 
     class Meta:
+        db_table = 'db_purchase_order'
         verbose_name = "采购订单"
         verbose_name_plural = verbose_name
 
@@ -120,7 +121,7 @@ class OrderDetail(models.Model):
     id = models.AutoField(primary_key=True)
     purchase_order = models.ForeignKey('PurchaseOrder', verbose_name='采购订单', related_name='po_od', on_delete=models.CASCADE)
     pr_detail = models.ForeignKey('purchaseRequest.PurchaseRequest', verbose_name='请购单物料明细', related_name='pr_od', on_delete=models.CASCADE)
-    cd_detail = models.ForeignKey('PurchaseContractDetail', verbose_name='合同物料明细', related_name='cd_od', on_delete=models.CASCADE)
+    pcd_detail = models.ForeignKey('PurchaseContractDetail', verbose_name='合同物料明细', related_name='pcd_od', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_od', on_delete=models.CASCADE)
     od_num = models.IntegerField(verbose_name='采购数量')
     od_taxRate = models.IntegerField(default=13, verbose_name='税率')

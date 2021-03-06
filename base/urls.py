@@ -10,7 +10,7 @@ from . import views
 urlpatterns = [
     # user
     url('login', views.LoginView.as_view(), name='login'),
-    url('login_exit', views.LoginExitView.as_view(), name='login_exit'),
+    url('logout', views.LogoutView.as_view(), name='logout'),
     url('user', views.UserView.as_view(), name='user'),
     url('user_new', views.UserNewView.as_view(), name='user_new'),
     url('user_add', views.UserAddView.as_view(), name='user_add'),

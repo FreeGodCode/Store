@@ -149,18 +149,18 @@ class Area(models.Model):
         return self.area_name
 
 
-# class Permission(models.Model):
-#     """权限""
-#
-#     id = models.AutoField(primary_key=True)
-#     permission_name = models.CharField(max_length=20, verbose_name='权限名字')
+class Permission(models.Model):
+    """权限"""
 
-#     def __str__(self):
-#         return self.permission_name
+    id = models.AutoField(primary_key=True)
+    permission_name = models.CharField(max_length=20, verbose_name='权限名字')
 
-# class Meta:
-#     db_table = 'db_permission'
-#     verbose_name = '权限'
+    def __str__(self):
+        return self.permission_name
+
+    class Meta:
+        db_table = 'db_permission'
+        verbose_name = '权限'
 
 
 class Brand(models.Model):

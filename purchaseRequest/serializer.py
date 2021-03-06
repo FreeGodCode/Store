@@ -9,44 +9,44 @@ class PurchaseRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PurchaseRequest
         fields = (
-            'id', 'pr_identify', 'org_name', 'area_name', 'pr_type', 'pr_department', 'pr_date', 'pr_remarks',
-            'pr_status', 'pr_creator', 'pr_creator_identify', 'pr_created_at', 'pr_closer', 'pr_closed_at',
-            'pr_closeReason'
+            'id', 'prq_identify', 'org_name', 'area_name', 'prq_type', 'prq_department', 'prq_date', 'prq_remarks',
+            'prq_status', 'prq_creator', 'prq_creator_identify', 'prq_created_at', 'prq_closer', 'prq_closed_at',
+            'prq_closeReason'
         )
 
 
 class PurchaseRequestDetailSerializer(serializers.ModelSerializer):
     # org_name = serializers.CharField(source='purchase_request.organization.org_name')
-    pr_identify = serializers.CharField(source='purchase_request.pr_identify')
-    prd_identify = serializers.CharField(source='material.material_identify')
-    prd_name = serializers.CharField(source='material.material_name')
-    prd_specification = serializers.CharField(source='material.material_specification')
-    prd_model = serializers.CharField(source='material.material_model')
-    prd_measure = serializers.CharField(source='material.measure_name')
+    prq_identify = serializers.CharField(source='purchase_request.prq_identify')
+    prqd_identify = serializers.CharField(source='material.material_identify')
+    prqd_name = serializers.CharField(source='material.material_name')
+    prqd_specification = serializers.CharField(source='material.material_specification')
+    prqd_model = serializers.CharField(source='material.material_model')
+    prqd_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
         model = models.PurchaseRequestDetail
         fields = (
-            'id', 'prd_identify','pr_identify', 'prd_name', 'prd_specification', 'prd_model', 'prd_measure','prd_num',
-            'prd_present_num', 'prd_remarks', 'prd_used'
+            'id', 'prqd_identify','prq_identify', 'prqd_name', 'prqd_specification', 'prqd_model', 'prqd_measure','prqd_num',
+            'prqd_present_num', 'prqd_remarks', 'prqd_used'
         )
 
 
 class PurchaseRequestDetail2Serializer(serializers.ModelSerializer):
-    pr_identify = serializers.CharField(source='purchase_request.pr_identify')
-    pr_date = serializers.DateTimeField(source='purchase_request.pr_type')
-    pr_department = serializers.CharField(source='purchase_request.pr_department')
-    pr_creator = serializers.CharField(source='purchase_request.pr_creator')
-    pr_creator_identify = serializers.CharField(source='purchase_request.pr_creator_identify')
-    prd_identify = serializers.CharField(source='material.material_identify')
-    prd_name = serializers.CharField(source='material.material_name')
-    prd_specification = serializers.CharField(source='material.material_specification')
-    prd_model = serializers.CharField(source='material.material_model')
-    prd_measure = serializers.CharField(source='material.measure_name')
+    prq_identify = serializers.CharField(source='purchase_request.prq_identify')
+    prq_date = serializers.DateTimeField(source='purchase_request.prq_type')
+    prq_department = serializers.CharField(source='purchase_request.prq_department')
+    prq_creator = serializers.CharField(source='purchase_request.prq_creator')
+    prq_creator_identify = serializers.CharField(source='purchase_request.prq_creator_identify')
+    prqd_identify = serializers.CharField(source='material.material_identify')
+    prqd_name = serializers.CharField(source='material.material_name')
+    prqd_specification = serializers.CharField(source='material.material_specification')
+    prqd_model = serializers.CharField(source='material.material_model')
+    prqd_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
         model = models.PurchaseRequestDetail
         fields = (
-            'id', 'pr_identify', 'pr_date', 'pr_department', 'pr_creator', 'pr_creator_identify','prd_identify',
-            'prd_name', 'prd_specification', 'prd_model', 'prd_measure','prd_num', 'prd_present_num', 'prd_remarks'
+            'id', 'prq_identify', 'prq_date', 'prq_department', 'prq_creator', 'prq_creator_identify','prqd_identify',
+            'prqd_name', 'prqd_specification', 'prqd_model', 'prqd_measure','prqd_num', 'prqd_present_num', 'prqd_remarks'
         )

@@ -84,7 +84,7 @@ class LoginView(APIView):
                     return HttpResponse({'message': '用户名或密码错误', 'signal': '2'})
 
 
-class LoginExitView(APIView):
+class LogoutView(APIView):
     """退出"""
 
     def post(self, request):
@@ -277,7 +277,7 @@ class UserStatusView(APIView):
 
 
 class UsersView(APIView):
-    """"""
+    """获取所有用户信息"""
 
     def get(self, request):
         users = UserProfile.objects.all()

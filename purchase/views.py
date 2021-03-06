@@ -66,12 +66,12 @@ class PurchaseContractNewView(APIView):
         except:
             return Response({"org_names": org_names, "supply_names": supply_names, "signal": 0})
         else:
-            cds = models.PurchaseContractDetail.objects.filter(purchase_contract__pc_identify=pc_identify)
-            cds_serializer = serializer.PurchaseContractDetailSerializer(cds, many=True)
+            pcds = models.PurchaseContractDetail.objects.filter(purchase_contract__pc_identify=pc_identify)
+            pcds_serializer = serializer.PurchaseContractDetailSerializer(pcds, many=True)
             pays = models.PurchaseContractPayDetail.objects.filter(purchase_contract__pc_identify=pc_identify)
             pays_serializer = serializer.PurchaseContractPaySerializer(pays, many=True)
             return Response({
-                "org_names": org_names, "supply_names": supply_names, "cds": cds_serializer.data,
+                "org_names": org_names, "supply_names": supply_names, "pcds": pcds_serializer.data,
                 "pays": pays_serializer.data, "signal": 1
             })
 
@@ -151,36 +151,36 @@ class PurchaseContractDetailSaveView(APIView):
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        cds = data['cds']
+        pcds = data['pcds']
         pc_identify = data['pc_identify']
         pays = data['pays']
         models.CdDetail.objects.filter(purchase_contract__pc_identify=pc_identify).delete()
         pc = models.PurchaseContract.objects.get(pc_identify=pc_identify)
         pc_sum = data['pc_sum']
         models.PurchaseContract.objects.filter(pc_identify=pc_identify).update(pc_sum=pc_sum)
-        for cd in cds:
-            cd_identify = cd['cd_identify']
-            material = Material.objects.get(material_iden=cd_identify)
-            cd_num = cd['cd_num']  # 销售数量
-            cd_taxRate = cd['cd_taxRate']
-            cd_tax_unitPrice = cd['cd_tax_unitPrice']
-            cd_unitPrice = cd['cd_unitPrice']
-            cd_tax_sum = cd['cd_tax_sum']
-            cd_sum = cd['cd_sum']
-            cd_tax_price = cd['cd_tax_price']
-            cd_pr_identify = cd['cd_pr_identify']
-            cd_prd_remarks = cd['cd_prd_remarks']
-            # PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pc_identify, prd_iden=cd_identify).update(prd_uesd=1)
+        for pcd in pcds:
+            pcd_identify = pcd['pcd_identify']
+            material = Material.objects.get(material_iden=pcd_identify)
+            pcd_num = pcd['pcd_num']  # 销售数量
+            pcd_taxRate = pcd['pcd_taxRate']
+            pcd_tax_unitPrice = pcd['pcd_tax_unitPrice']
+            pcd_unitPrice = pcd['pcd_unitPrice']
+            pcd_tax_sum = pcd['pcd_tax_sum']
+            pcd_sum = pcd['pcd_sum']
+            pcd_tax_price = pcd['pcd_tax_price']
+            pcd_pr_identify = pcd['pcd_pr_identify']
+            pcd_prd_remarks = pcd['pcd_prd_remarks']
+            # PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pc_identify, prd_iden=pcd_identify).update(prd_uesd=1)
             # 更新请购单物料使用状态
             try:
                 if models.CdDetail.objects.create(purchase_contract=pc, material=material,
-                                                  cd_num=cd_num, cd_taxRate=cd_taxRate,
-                                                  cd_tax_unitPrice=cd_tax_unitPrice,
-                                                  cd_unitPrice=cd_unitPrice,
-                                                  cd_tax_sum=cd_tax_sum, cd_sum=cd_sum,
-                                                  cd_tax_price=cd_tax_price,
-                                                  cd_pr_identify=cd_pr_identify,
-                                                  cd_prd_remarks=cd_prd_remarks):
+                                                  pcd_num=pcd_num, pcd_taxRate=pcd_taxRate,
+                                                  pcd_tax_unitPrice=pcd_tax_unitPrice,
+                                                  pcd_unitPrice=pcd_unitPrice,
+                                                  pcd_tax_sum=pcd_tax_sum, pcd_sum=pcd_sum,
+                                                  pcd_tax_price=pcd_tax_price,
+                                                  pcd_pr_identify=pcd_pr_identify,
+                                                  pcd_prd_remarks=pcd_prd_remarks):
                     pass
                 else:
                     self.message = "合同详情保存失败"
@@ -229,7 +229,7 @@ class PurchaseContractDetailSubmitView(APIView):
             self.user_now_name = user_now.user_name
             self.area_name = user_now.area_name
         pc_identify = data['pc_identify']
-        cds = data['cds']
+        pcds = data['pcds']
         try:
             if models.PurchaseContract.objects.filter(pc_identify=pc_identify).update(pc_status=1):
                 pass
@@ -240,13 +240,13 @@ class PurchaseContractDetailSubmitView(APIView):
             self.message = "合同明细提交失败"
             self.signal = 1
 
-        for cd in cds:
-            cd_identify = cd['cd_identify']
-            cd_pr_identify = cd['cd_pr_identify']
-            PurchaseContractDetail.objects.filter(purchase_request__pr_identify=cd_pr_identify, material__material_iden=cd_identify).update(
+        for pcd in pcds:
+            pcd_identify = pcd['pcd_identify']
+            pcd_pr_identify = pcd['pcd_pr_identify']
+            PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pcd_pr_identify, material__material_iden=pcd_identify).update(
                 prd_used=1)
-            prds = PurchaseContractDetail.objects.filter(purchase_request__pr_identify=cd_pr_identify).all()
-            pr = PurchaseRequest.objects.filter(pr_identify=cd_pr_identify)
+            prds = PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pcd_pr_identify).all()
+            pr = PurchaseRequest.objects.filter(pr_identify=pcd_pr_identify)
             flag = 0
             for prd in prds:
                 if prd.prd_used == 0:
@@ -306,7 +306,7 @@ class PurchaseContractDetailNewView(APIView):
 #             # 这里面请购单的userd状态还没有改，后面要判断
 #             try:
 #                 models.CdDetail.objects.create(purchase_contract=pc, material=material,
-#                                                cd_num=prd_num, cd_pr_identify=pr_identify)
+#                                                pcd_num=prd_num, pcd_pr_identify=pr_identify)
 #             except:
 #                 return Response({"message": "新建合同物料详情出现错误"})
 #         return Response({"message": "新建合同物料详情成功", "signal": 0})
@@ -316,12 +316,12 @@ class PurchaseContractDetailNewView(APIView):
 #
 #     def post(self, request):
 #         data = json.loads(request.body.decode("utf-8"))
-#         cds = data['cds']
-#         for cd in cds:
-#             # cd_rp_identify = cd['cd_rp_identify'] # 请购单号
-#             cd_identify = cd['cd_identify']  # 物料编码
+#         pcds = data['pcds']
+#         for pcd in pcds:
+#             # pcd_rp_identify = pcd['pcd_rp_identify'] # 请购单号
+#             pcd_identify = pcd['pcd_identify']  # 物料编码
 #             try:
-#                 models.CdDetail.objects.filter(cd_identify=cd_identify).delete()
+#                 models.CdDetail.objects.filter(pcd_identify=pcd_identify).delete()
 #             except:
 #                 return Response({"message": "删除物料错误"})
 #         return Response({"message": "删除物料成功", "signal": 0})
@@ -472,13 +472,13 @@ class PurchaseContractChoiceView(APIView):
 #         except:
 #              self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name, pc_status=1).all()
 #             pcs_serializer = PCSerializer(self.pcs, many=True)
-#             cds_list = []
+#             pcds_list = []
 #             for pc in self.pcs:
 #                 pc_identify = pc.pc_identify
-#                 cds = models.CdDetail.objects.filter(purchase_contract__pc_identify=pc_identify).all()
-#                 cds_serializer = CdDSerializer(cds, many=True)
-#                 cds_list.append(cds_serializer.data)
-#             return Response({"pcs": pcs_serializer.data, "cds": cds_list, "signal": 0})  # 合同和对应的合同明细
+#                 pcds = models.CdDetail.objects.filter(purchase_contract__pc_identify=pc_identify).all()
+#                 pcds_serializer = CdDSerializer(pcds, many=True)
+#                 pcds_list.append(pcds_serializer.data)
+#             return Response({"pcs": pcs_serializer.data, "pcds": pcds_list, "signal": 0})  # 合同和对应的合同明细
 #             return Response({})
 #         else:
 #             ods = models.OrderDetail.objects.filter(purchase_order__po_identify=po_identify).all()
@@ -508,16 +508,16 @@ class PurchaseContractChoiceView(APIView):
             self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name, organization__org_name=org_name, pc_status=1).all()
         finally:
             pcs_serializer = PCSerializer(self.pcs, many=True)
-            cds_list = ""
+            pcds_list = ""
             for pc in self.pcs:
                 pc_identify = pc.pc_identify
-                cds = models.CdDetail.objects.filter(purchase_contract__pc_identify=pc_identify).all()
-                if cds_list == "":
-                    cds_list = cds
+                pcds = models.CdDetail.objects.filter(purchase_contract__pc_identify=pc_identify).all()
+                if pcds_list == "":
+                    pcds_list = pcds
                 else:
-                    cds_list = cds_list | cds
-            cds_serializer = CdDSerializer(cds_list, many=True)
-            return Response({"pcs": pcs_serializer.data, "cds": cds_serializer.data, "signal": 0})  # 合同和对应的合同明细
+                    pcds_list = pcds_list | pcds
+            pcds_serializer = CdDSerializer(pcds_list, many=True)
+            return Response({"pcs": pcs_serializer.data, "pcds": pcds_serializer.data, "signal": 0})  # 合同和对应的合同明细
 
 
 class PurchaseOrderUpdateView(APIView):

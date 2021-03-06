@@ -7,11 +7,11 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url('buy_in_stores', views.BuyInStoresView.as_view(), name='buy_in_stores'),
-    url('buy_in_store_new', views.BuyInStoreNewView.as_view(), name='buy_in_store_new'),
-    url('buy_in_store_update', views.BuyInStoreUpdateView.as_view(), name='buy_in_store_update'),
+    url('purchase_receipts', views.PurchaseReceiptsView.as_view(), name='purchase_receipts'),
+    url('purchase_receipt_new', views.PurchaseReceiptNewView.as_view(), name='purchase_receipt_new'),
+    url('purchase_receipt_update', views.PurchaseReceiptUpdateView.as_view(), name='purchase_receipt_update'),
     url('purchase_order_choice', views.PurchaseOrderChoiceView.as_view(), name='purchase_order_choice'),
-    url('buy_in_store_detail_save', views.BuyInStoreDetailSaveView.as_view(), name='buy_in_store_detail_save'),
-    url('buy_in_store_detail_submit', views.BuyInStoreDetailSubmitView.as_view(), name='buy_in_store_detail_submit'),
-    url('buy_in_store_delete', views.BuyInStoreDeleteView.as_view(), name='buy_in_store_delete')
+    url('purchase_receipt_detail_save', views.PurchaseReceiptDetailSaveView.as_view(), name='purchase_receipt_detail_save'),
+    url('purchase_receipt_detail_submit', views.PurchaseReceiptDetailSubmitView.as_view(), name='purchase_receipt_detail_submit'),
+    url('purchase_receipt_delete', views.PurchaseReceiptDeleteView.as_view(), name='purchase_receipt_delete')
 ]

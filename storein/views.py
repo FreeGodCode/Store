@@ -1,16 +1,16 @@
 import json
 from django.shortcuts import render
-from .serializer import BuyInStoreSerializer, BuyInStoreDetailSerializer
+from .serializer import PurchaseReceiptSerializer, PurchaseReceiptDetailSerializer
 from rest_framework.views import APIView
 from base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
-from storein import models
+from . import models
 
 
-class BuyInStoresView(APIView):
+class PurchaseReceiptsView(APIView):
     """"""
 
     def __init__(self, **kwargs):
-        super(BuyInStoresView, self).__init__(**kwargs)
+        super(PurchaseReceiptsView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
 
@@ -25,27 +25,27 @@ class BuyInStoresView(APIView):
         permission = data['permission']
         print(permission)
         if permission == '1':
-            biss = models.BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
+            prcs = models.PurchaseReceipt.objects.filter(~Q(prc_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
-            biss = models.BuyInStore.objects.filter(bis_creator_identify=user_identify,
+            prcs = models.PurchaseReceipt.objects.filter(prc_creator_identify=user_identify,
                                                     organization__area_name=self.area_name).all()
         else:
-            biss1 = models.BuyInStore.objects.filter(~Q(bis_status=0), organization__area_name=self.area_name).all()
-            biss2 = models.BuyInStore.objects.filter(bis_creator_identify=user_identify,
+            prcs1 = models.PurchaseReceipt.objects.filter(~Q(prc_status=0), organization__area_name=self.area_name).all()
+            prcs2 = models.PurchaseReceipt.objects.filter(prc_creator_identify=user_identify,
                                                      organization__area_name=self.area_name).all()
-            biss = biss1 | biss2
-        if biss:
-            biss_serializer = models.BuyInStoreSerializer(biss, many=True)
-            return Response({"biss": biss_serializer.data, "signal": 0})
+            prcs = prcs1 | prcs2
+        if prcs:
+            prcs_serializer = models.PurchaseReceiptSerializer(prcs, many=True)
+            return Response({"prcs": prcs_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
 
 
-class BuyInStoreNewView(APIView):
+class PurchaseReceiptNewView(APIView):
     """"""
 
     def __init__(self, **kwargs):
-        super(BuyInStoreNewView, self).__init__(**kwargs)
+        super(PurchaseReceiptNewView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
 
@@ -67,27 +67,27 @@ class BuyInStoreNewView(APIView):
         supply_names = Supplier.objects.filter(supply_status=1).values_list('id', 'supply_name')
 
         try:
-            bis_identify = data['bis_identify']
+            prc_identify = data['prc_identify']
         except:
             return Response({"supply_names": supply_names, "org_ware_houses": org_ware_houses, "signal": 0})
         else:
-            bds = models.BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).all()
-            bds_serializer = models.BuyInStoreDSerializer(bds, many=True)
+            prcds = models.PurchaseReceiptDetail.objects.filter(purchase_receipt__prc_identify=prc_identify).all()
+            prcds_serializer = models.PurchaseReceiptDSerializer(prcds, many=True)
             return Response(
-                {"supply_names": supply_names, "org_ware_houses": org_ware_houses, "bds": bds_serializer.data,
+                {"supply_names": supply_names, "org_ware_houses": org_ware_houses, "prcds": prcds_serializer.data,
                  "signal": 1})
 
 
-class BuyInStoreUpdateView(APIView):
+class PurchaseReceiptUpdateView(APIView):
     """"""
 
     def __init__(self, **kwargs):
-        super(BuyInStoreUpdateView, self).__init__(**kwargs)
+        super(PurchaseReceiptUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
         self.signal = 0
         self.user_now_name = ""
         self.area_name = ""
-        self.bis_new_identify = ""
+        self.prc_new_identify = ""
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
@@ -102,28 +102,28 @@ class BuyInStoreUpdateView(APIView):
         supplier = Supplier.objects.get(supply_name=supply_name)
         in_ware_house = data['in_ware_house']
         in_ware_house = TotalWareHouse.objects.get(organization__area_name=self.area_name, total_name=in_ware_house)
-        bis_date = data['bis_date']
-        bis_remarks = data['bis_remarks']
+        prc_date = data['prc_date']
+        prc_remarks = data['prc_remarks']
 
         try:
-            bis_identify = data['bis_identify']
+            prc_identify = data['prc_identify']
         except:
             date_str = timezone.now().strftime("%Y-%m-%d")
             date = "".join(date_str.split("-"))
             pre_identify = "BI" + date
-            max_id = models.BuyInStore.objects.all().aggregate(Max('bis_serial'))['bis_serial__max']
+            max_id = models.PurchaseReceipt.objects.all().aggregate(Max('prc_serial'))['prc_serial__max']
             if max_id:
-                bis_serial = str(int(max_id) + 1).zfill(4)
+                prc_serial = str(int(max_id) + 1).zfill(4)
             else:
-                bis_serial = "0001"
-            bis_new_identify = pre_identify + bis_serial
-            self.bis_new_identify = bis_new_identify
+                prc_serial = "0001"
+            prc_new_identify = pre_identify + prc_serial
+            self.prc_new_identify = prc_new_identify
             try:
-                if models.BuyInStore.objects.create(bis_identify=self.bis_new_identify, bis_serial=bis_serial,
+                if models.PurchaseReceipt.objects.create(prc_identify=self.prc_new_identify, prc_serial=prc_serial,
                                                     organization=organization, totalwarehouse=in_ware_house,
-                                                    supplier=supplier, bis_date=bis_date, bis_remarks=bis_remarks,
-                                                    bis_status=0, bis_creator=self.user_now_name,
-                                                    bis_creator_identify=user_identify):
+                                                    supplier=supplier, prc_date=prc_date, prc_remarks=prc_remarks,
+                                                    prc_status=0, prc_creator=self.user_now_name,
+                                                    prc_creator_identify=user_identify):
                     self.message = "新建采购入库单成功"
                     self.signal = 0
                 else:
@@ -134,14 +134,14 @@ class BuyInStoreUpdateView(APIView):
                 self.message = "新建采购入库单失败"
                 self.signal = 1
         else:
-            bis = models.BuyInStore.objects.filter(bis_identify=bis_identify)
-            if bis:
-                bis.update(organization=organization, totalwarehouse=in_ware_house, supplier=supplier,
-                           bis_date=bis_date, bis_remarks=bis_remarks)
+            prc = models.PurchaseReceipt.objects.filter(prc_identify=prc_identify)
+            if prc:
+                prc.update(organization=organization, totalwarehouse=in_ware_house, supplier=supplier,
+                           prc_date=prc_date, prc_remarks=prc_remarks)
             else:
                 self.message = "更新失败"
                 self.signal = 1
-        return Response({"message": self.message, "signal": self.signal, "bis_new_identify": self.bis_new_identify})
+        return Response({"message": self.message, "signal": self.signal, "prc_new_identify": self.prc_new_identify})
 
 
 class PurchaseOrderChoiceView(APIView):
@@ -181,34 +181,34 @@ class PurchaseOrderChoiceView(APIView):
             return Response({"pos": pos_serializer.data, "ords": ords_list, "signal": 0})  # 订单和对应的订单明细
 
 
-class BuyInStoreDetailSaveView(APIView):
+class PurchaseReceiptDetailSaveView(APIView):
     def __init__(self, **kwargs):
-        super(BuyInStoreDetailSaveView, self).__init__(**kwargs)
+        super(PurchaseReceiptDetailSaveView, self).__init__(**kwargs)
         self.message = "采购入库单详情保存成功"
         self.signal = 0
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
-        bds = data["bds"]
-        bis_identify = data["bis_identify"]
-        models.BuyInStoreDetail.objects.filter(buy_in_store__bis_identify=bis_identify).delete()
-        bis = models.BuyInStore.objects.get(bis_identify=bis_identify)
-        for bd in bds:
-            bd_identify = bd['bd_identify']
-            material = Material.objects.get(material_identify=bd_identify)
-            bd_paper_num = bd['bd_paper_num']
-            bd_real_num = bd['bd_real_num']
-            bd_unitPrice = bd['bd_unitPrice']
-            bd_sum = bd['bd_sum']
-            po_identify = bd['po_identify']
-            pr_identify = bd['pr_identify']
+        prcds = data["prcds"]
+        prcd_identify = data["prcd_identify"]
+        models.PurchaseReceiptDetail.objects.filter(purchase_receipt__prc_identify=prcd_identify).delete()
+        prc = models.PurchaseReceipt.objects.get(prc_identify=prc_identify)
+        for prcd in prcds:
+            prcd_identify = prcd['prcd_identify']
+            material = Material.objects.get(material_identify=prcd_identify)
+            prcd_paper_num = prcd['prcd_paper_num']
+            prcd_real_num = prcd['prcd_real_num']
+            prcd_unitPrice = prcd['prcd_unitPrice']
+            prcd_sum = prcd['prcd_sum']
+            po_identify = prcd['po_identify']
+            prq_identify = prcd['prq_identify']
 
             try:
-                if models.BuyInStoreDetail.objects.create(buy_in_store=bis, material=material,
-                                                          bd_paper_num=bd_paper_num,
-                                                          bd_real_num=bd_real_num, bd_unitPrice=bd_unitPrice,
-                                                          bd_sum=bd_sum,
-                                                          po_identify=po_identify, pr_identify=pr_identify):
+                if models.PurchaseReceiptDetail.objects.create(purchase_receipt=prc, material=material,
+                                                          prcd_paper_num=prcd_paper_num,
+                                                          prcd_real_num=prcd_real_num, prcd_unitPrice=prcd_unitPrice,
+                                                          prcd_sum=prcd_sum,
+                                                          po_identify=po_identify, prq_identify=prq_identify):
                     pass
                 else:
                     self.message = "采购入库单详情保存失败"
@@ -221,9 +221,9 @@ class BuyInStoreDetailSaveView(APIView):
         return Response({'message': self.message, 'signal': self.signal})
 
 
-class BuyInStoreDetailSubmitView(APIView):
+class PurchaseReceiptDetailSubmitView(APIView):
     def __init__(self, **kwargs):
-        super(BuyInStoreDetailSubmitView, self).__init__(**kwargs)
+        super(PurchaseReceiptDetailSubmitView, self).__init__(**kwargs)
         self.message = "采购入库单提交保存成功"
         self.signal = 0
         self.user_now_name = ""
@@ -238,12 +238,12 @@ class BuyInStoreDetailSubmitView(APIView):
             self.user_now_name = user_now.user_name
             self.area_name = user_now.area_name
 
-        bis_identify = data["bis_identify"]
-        bds = data["bds"]
+        prc_identify = data["prc_identify"]
+        prcds = data["prcds"]
         in_ware_house = data["in_ware_house"]
         org_name = data["org_name"]
         try:
-            if models.BuyInStore.objects.filter(bis_identify=bis_identify).update(bis_status=1):
+            if models.PurchaseReceipt.objects.filter(prc_identify=prc_identify).update(prc_status=1):
                 pass
             else:
                 self.message = "采购入库单提交保存失败"
@@ -252,29 +252,29 @@ class BuyInStoreDetailSubmitView(APIView):
             traceback.print_exc()
             self.message = "采购入库单提交保存失败"
             self.signal = 1
-        for bd in bds:
-            bd_identify = data['bd_identify']  # 物料编码
-            bd_real_num = bd['bd_real_num']
-            bd_unitPrice = bd['bd_unitPrice']
+        for prcd in prcds:
+            prcd_identify = data['prcd_identify']  # 物料编码
+            prcd_real_num = prcd['prcd_real_num']
+            prcd_unitPrice = prcd['prcd_unitPrice']
 
             totaL_stock = TotalStock.objects.get(
                 totalwarehouse__total_name=in_ware_house,
                 totalwarehouse__organization__area_name=self.area_name,
                 totalwarehouse__organization__org_name=org_name,
-                material__material_identify=bd_identify
+                material__material_identify=prcd_identify
             )
             ts_present_num = totaL_stock.ts_present_num
             ts_present_price = totaL_stock.ts_present_price
 
-            ts_new_num = ts_present_num + bd_real_num
-            ts_new_price = (bd_real_num * bd_unitPrice + ts_present_num * ts_present_price) / ts_new_num
+            ts_new_num = ts_present_num + prcd_real_num
+            ts_new_price = (prcd_real_num * prcd_unitPrice + ts_present_num * ts_present_price) / ts_new_num
 
             try:
                 if TotalStock.objects.filter(
                         totalwarehouse__total_name=in_ware_house,
                         totalwarehouse__organization__area_name=self.area_name,
                         totalwarehouse__organization__org_name=org_name,
-                        material__material_identify=bd_identify
+                        material__material_identify=prcd_identify
                 ).update(ts_present_num=ts_new_num, ts_present_price=ts_new_price):
                     pass
                 else:
@@ -288,21 +288,21 @@ class BuyInStoreDetailSubmitView(APIView):
         return Response({'message': self.message, 'signal': self.signal})
 
 
-class BuyInStoreDeleteView(APIView):
+class PurchaseReceiptDeleteView(APIView):
     """"""
 
     def __init__(self, **kwargs):
-        super(BuyInStoreDeleteView, self).__init__(**kwargs)
+        super(PurchaseReceiptDeleteView, self).__init__(**kwargs)
         self.message = "删除采购入库单成功"
         self.signal = 0
 
     def post(self, request):
         """需要数据为合同编号"""
         data = json.loads(request.body.decode("utf-8"))
-        bis_identify = data['bis_identify']
+        prc_identify = data['prc_identify']
 
         try:
-            if models.BuyInStore.objects.filter(bis_identify=bis_identify).delete()[0]:
+            if models.PurchaseReceipt.objects.filter(prc_identify=prc_identify).delete()[0]:
                 pass
             else:
                 self.message = "删除采购入库单失败"

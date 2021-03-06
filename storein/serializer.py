@@ -7,7 +7,7 @@ from rest_framework import serializers
 from . import models
 
 
-class BuyInStoreSerializer(serializers.ModelSerializer):
+class PurchaseReceiptSerializer(serializers.ModelSerializer):
     org_name = serializers.CharField(source='organization.org_name')
     area_name = serializers.CharField(source='organization.area_name')
     total_name = serializers.CharField(source='total_ware_house.total_name')
@@ -16,22 +16,24 @@ class BuyInStoreSerializer(serializers.ModelSerializer):
     # total_name = serializers.CharField(source='totalwarehouse.total_name')
 
     class Meta:
-        model = models.BuyInStore
+        model = models.PurchaseReceipt
         fields = (
-            'id', 'org_name', 'area_name', 'total_name', 'supply_name', 'supply_identify', 'bis_identify', 'bis_date', 'bis_remarks', 'bis_status', 'bis_creator', 'bis_creator_identify', 'bis_created_at'
+            'id', 'org_name', 'area_name', 'total_name', 'supply_name', 'supply_identify', 'prc_identify', 'prc_date',
+            'prc_remarks', 'prc_status', 'prc_creator', 'prc_creator_identify', 'prc_created_at'
         )
 
 
-class BuyInStoreDetailSerializer(serializers.ModelSerializer):
-    bis_identify = serializers.CharField(source='buy_in_store.bis_identify')
-    bd_identify = serializers.CharField(source='material.material_identify')
-    bd_name = serializers.CharField(source='material.material_name')
-    bd_specification = serializers.CharField(source='material.material_specification')
-    bd_model = serializers.CharField(source='material.material_model')
-    bd_measure = serializers.CharField(source='material.measure_name')
+class PurchaseReceiptDetailSerializer(serializers.ModelSerializer):
+    prc_identify = serializers.CharField(source='purchase_receipt.prc_identify')
+    prcd_identify = serializers.CharField(source='material.material_identify')
+    prcd_name = serializers.CharField(source='material.material_name')
+    prcd_specification = serializers.CharField(source='material.material_specification')
+    prcd_model = serializers.CharField(source='material.material_model')
+    prcd_measure = serializers.CharField(source='material.measure_name')
 
     class Meta:
-        model = models.BuyInStoreDetail
+        model = models.PurchaseReceiptDetail
         fields = (
-            'id', 'bis_identify', 'bd_identify', 'bd_name', 'bd_specification', 'bd_model', 'bd_measure', 'bd_paper_num', 'bd_real_num', 'bd_unitPrice', 'bd_sum', 'po_identify', 'pr_identify'
+            'id', 'prc_identify', 'prcd_identify', 'prcd_name', 'prcd_specification', 'prcd_model', 'prcd_measure', 'prcd_paper_num',
+            'prcd_real_num', 'prcd_unitPrice', 'prcd_sum', 'po_identify', 'prq_identify'
         )

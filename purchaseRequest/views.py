@@ -35,16 +35,16 @@ class PurchaseRequestsView(APIView):
         print(permission)
         # 判断是个人还是采购专员
         if permission == '1':
-            prs = models.PurchaseRequest.objects.filter(~Q(pr_status=0), organization__area_name=self.area_name).all()
+            prqs = models.PurchaseRequest.objects.filter(~Q(prq_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
-            prs = models.PurchaseRequest.objects.filter(pr_creator_identify=user_identify, organization__area_name=self.area_name).all()
+            prqs = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify, organization__area_name=self.area_name).all()
         else:
-            prs1 = models.PurchaseRequest.objects.filter(~Q(pr_status=0), organization__area_name=self.area_name).all()
-            prs2 = models.PurchaseRequest.objects.filter(pr_creator_identify=user_identify, organization__area_name=self.area_name).all()
-            prs = prs1 | prs2
-        if prs:
-            prs_serializer = PurchaseRequestSerializer(prs, many=True)
-            return Response({"prs": prs_serializer.data, "signal": 0})
+            prqs1 = models.PurchaseRequest.objects.filter(~Q(prq_status=0), organization__area_name=self.area_name).all()
+            prqs2 = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify, organization__area_name=self.area_name).all()
+            prqs = prqs1 | prqs2
+        if prqs:
+            prqs_serializer = PurchaseRequestSerializer(prqs, many=True)
+            return Response({"prqs": prqs_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
 
@@ -67,27 +67,27 @@ class PurchaseRequestNewView(APIView):
         org_names = Organization.objects.filter(area_name=self.area_name, org_status=1).values_list('id', 'org_name')
         dpms = Department.objects.filter(dpm_status=1).values_list('id', 'dpm_name', 'dpm_center')
         try:
-            pr_identify = data['pr_identify']
+            prq_identify = data['prq_identify']
             org_name = data['org_name']
         except:
             return Response({"org_names": org_names, "dpms": dpms, "signal": 0})
         else:
-            prds = models.PurchaseRequestDetail.objects.filter(purchase_request__pr_identify=pr_identify)
-            prds_serializers = PurchaseRequestDetailSerializer(prds, many=True)
-            prds_present_num = []
-            for prd in prds:
-                material = prd.material
-                prd_present_num = TotalStock.objects.filter(
+            prqds = models.PurchaseRequestDetail.objects.filter(purchase_request__prq_identify=prq_identify)
+            prqds_serializers = PurchaseRequestDetailSerializer(prqds, many=True)
+            prqds_present_num = []
+            for prqd in prqds:
+                material = prqd.material
+                prqd_present_num = TotalStock.objects.filter(
                     totalwarehouse__organization__org_name=org_name,
                    totalwarehouse__organization__area_name=self.area_name,
-                    material=material).aggregate( prd_present_num=Sum('ts_present_num'))['prd_present_num']
-                if prd_present_num:
+                    material=material).aggregate( prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
+                if prqd_present_num:
                     pass
                 else:
-                    prd_present_num = 0
-                prds_present_num.append(prd_present_num)
+                    prqd_present_num = 0
+                prqds_present_num.append(prqd_present_num)
 
-            return Response({"org_names": org_names, 'dpms': dpms, "prds": prds_serializers.data, "prds_present_num": prds_present_num, "signal": 1})
+            return Response({"org_names": org_names, 'dpms': dpms, "prqds": prqds_serializers.data, "prqds_present_num": prqds_present_num, "signal": 1})
 
 
 # class PurchaseRequestUpdateView(APIView):
@@ -96,18 +96,18 @@ class PurchaseRequestNewView(APIView):
 #     def post(self, request):
 #         message_return = {}
 #         data = json.loads(request.body.decode("utf-8"))
-#         pr_status = data['pr_status']
+#         prq_status = data['prq_status']
 #         area_name = data['area_name']
-#         pr_identify = data['pr_identify']
-#         pr = models.PurchaseRequest.objects.get(pr_identify=pr_identify)
-#         prds = models.PurchaseRequestDetail.objects.filter(purchase_request=pr)
-#         if prds:
-#             prds_serializer = PurchaseRequestDetailSerializer(prds, many=True)
-#             message_return["prds"] = prds_serializer.data
+#         prq_identify = data['prq_identify']
+#         prq = models.PurchaseRequest.objects.get(prq_identify=prq_identify)
+#         prqds = models.PurchaseRequestDetail.objects.filter(purchase_request=prq)
+#         if prqds:
+#             prqds_serializer = PurchaseRequestDetailSerializer(prqds, many=True)
+#             message_return["prqds"] = prqds_serializer.data
 #         else:
-#             message_return["prds"] = ""
+#             message_return["prqds"] = ""
 #
-#         if pr_status == 0:
+#         if prq_status == 0:
 #             org_names = Organization.objects.filter(area_name=area_name).values_list('org_name', flat=True)
 #             message_return["organizations"] = org_names
 #         else:
@@ -124,7 +124,7 @@ class PurchaseRequestUpdateView(APIView):
         self.signal = 0
         self.user_now_name = ""
         self.area_name = ""
-        self.pr_new_identify = ""
+        self.prq_new_identify = ""
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
@@ -135,32 +135,32 @@ class PurchaseRequestUpdateView(APIView):
             self.area_name = user_now.area_name
         org_name = data['org_name']
         organization = Organization.objects.get(area_name=self.area_name, org_name=org_name)
-        department_name = data['pr_department']
-        pr_type = data['pr_type']
-        pr_date = data['pr_date']
-        pr_remarks = data['pr_remarks']
-        print(pr_date)
+        department_name = data['prq_department']
+        prq_type = data['prq_type']
+        prq_date = data['prq_date']
+        prq_remarks = data['prq_remarks']
+        print(prq_date)
 
         try:
-            pr_identify = data['pr_identify']
+            prq_identify = data['prq_identify']
         except:
             date_str = timezone.now().strftime("%Y-%m-%d")
             date = "".join(date_str.split("-"))
-            pre_identify = "PR" + date
-            max_id = models.PurchaseRequest.objects.all().aggregate(Max('pr_serial'))['pr_serial__max']
+            prqe_identify = "PR" + date
+            max_id = models.PurchaseRequest.objects.all().aggregate(Max('prq_serial'))['prq_serial__max']
             if max_id:
-                pr_serial = str(int(max_id) + 1).zfill(4)
+                prq_serial = str(int(max_id) + 1).zfill(4)
             else:
-                pr_serial = "0001"
-            pr_new_identify = pre_identify + pr_serial
-            self.pr_new_identify = pr_new_identify
+                prq_serial = "0001"
+            prq_new_identify = prqe_identify + prq_serial
+            self.prq_new_identify = prq_new_identify
             try:
-                res = models.PurchaseRequest.objects.create(pr_identify=pr_new_identify, pr_serial=pr_serial,
-                                                            organization=organization, pr_department=department_name,
-                                                            pr_type=pr_type, pr_date=pr_date,
-                                                            pr_remarks=pr_remarks,
-                                                            pr_status=0, pr_creator=self.user_now_name,
-                                                            pr_creator_identify=user_identify)
+                res = models.PurchaseRequest.objects.create(prq_identify=prq_new_identify, prq_serial=prq_serial,
+                                                            organization=organization, prq_department=department_name,
+                                                            prq_type=prq_type, prq_date=prq_date,
+                                                            prq_remarks=prq_remarks,
+                                                            prq_status=0, prq_creator=self.user_now_name,
+                                                            prq_creator_identify=user_identify)
                 if res:
                     self.message = "新建请购单成功"
                     self.signal = 0
@@ -172,9 +172,9 @@ class PurchaseRequestUpdateView(APIView):
                 self.message = "新建请购单失败"
                 self.signal = 1
         else:
-            pr = models.PurchaseRequest.objects.filter(pr_identify=pr_identify)
-            if pr:
-                if pr.update(organization=organization, pr_department=department_name, pr_type=pr_type, pr_date=pr_date, pr_remarks=pr_remarks):
+            prq = models.PurchaseRequest.objects.filter(prq_identify=prq_identify)
+            if prq:
+                if prq.update(organization=organization, prq_department=department_name, prq_type=prq_type, prq_date=prq_date, prq_remarks=prq_remarks):
                     pass
                 else:
                     self.message = "更新失败"
@@ -182,7 +182,7 @@ class PurchaseRequestUpdateView(APIView):
             else:
                 self.message = "更新失败"
                 self.signal = 1
-        return Response({"message": self.message, "signal": self.signal, "pr_new_identify": self.pr_new_identify})
+        return Response({"message": self.message, "signal": self.signal, "prq_new_identify": self.prq_new_identify})
 
 
 class PurchaseRequestDetailSaveView(APIView):
@@ -195,24 +195,24 @@ class PurchaseRequestDetailSaveView(APIView):
     def post(self, request):
         """需要获取物料详情信息(主要是identify和请购数量）"""
         data = json.loads(request.body.decode("utf-8"))
-        prds = data['prds']
-        pr_identify = data['pr_identify']
-        models.PurchaseRequestDetail.objects.filter(purchase_request__pr_identify=pr_identify).delete()
-        pr = models.PurchaseRequest.objects.get(pr_identify=pr_identify)
-        print('prds')
-        for prd in prds:
-            prd_identify = prd['prd_identify']  # 物料编码
-            # id = prd['prd_id']  # 物料id
-            prd_num = prd['prd_num']  # 请购数量
-            prd_present_num = prd['prd_present_num']  # 实际库存数量
-            prd_remarks = prd['prd_remarks']
-            material = Material.objects.get(material_iden=prd_identify)
+        prqds = data['prqds']
+        prq_identify = data['prq_identify']
+        models.PurchaseRequestDetail.objects.filter(purchase_request__prq_identify=prq_identify).delete()
+        prq = models.PurchaseRequest.objects.get(prq_identify=prq_identify)
+        print('prqds')
+        for prqd in prqds:
+            prqd_identify = prqd['prqd_identify']  # 物料编码
+            # id = prqd['prqd_id']  # 物料id
+            prqd_num = prqd['prqd_num']  # 请购数量
+            prqd_present_num = prqd['prqd_present_num']  # 实际库存数量
+            prqd_remarks = prqd['prqd_remarks']
+            material = Material.objects.get(material_iden=prqd_identify)
             try:
-                s = models.PurchaseRequestDetail.objects.create(purchase_request=pr, prd_num=prd_num,
+                s = models.PurchaseRequestDetail.objects.create(purchase_request=prq, prqd_num=prqd_num,
                                                    material = material,
-                                                   prd_used = 0,
-                                                   prd_present_num=prd_present_num,
-                                                   prd_remarks=prd_remarks)
+                                                   prqd_used = 0,
+                                                   prqd_present_num=prqd_present_num,
+                                                   prqd_remarks=prqd_remarks)
                 print(s)
                 #     pass
                 # else:
@@ -235,9 +235,9 @@ class PurchaseRequestDetailSubmitView(APIView):
     def post(self, request):
         """提交后将草稿改为已审批，需要数据为"""
         data = json.loads(request.body.decode("utf-8"))
-        pr_identify = data['pr_identify']
+        prq_identify = data['prq_identify']
         try:
-            if models.PurchaseRequest.objects.filter(pr_identify=pr_identify).update(pr_status=1):
+            if models.PurchaseRequest.objects.filter(prq_identify=prq_identify).update(prq_status=1):
                 pass
             else:
                 self.message = "请购单提交保存失败"
@@ -267,18 +267,18 @@ class PurchaseRequestDetailNewView(APIView):
 
         if materials:
             materials_serializer = MaterialSerializer(materials, many=True)
-            prds_present_num = []
+            prqds_present_num = []
             for material in materials:
-                prd_present_num = TotalStock.objects.filter(totalwarehouse__organization__org_name=org_name,
+                prqd_present_num = TotalStock.objects.filter(totalwarehouse__organization__org_name=org_name,
                                                             totalwarehouse__organization__area_name=self.area_name,
-                                                            material=material).aggregate(prd_present_num=Sum('ts_present_num'))['prd_present_num']
-                if prd_present_num:
+                                                            material=material).aggregate(prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
+                if prqd_present_num:
                     pass
                 else:
-                    prd_present_num = 0
-                prds_present_num.append(prd_present_num)
+                    prqd_present_num = 0
+                prqds_present_num.append(prqd_present_num)
 
-            return Response({"materials": materials_serializer.data, "prds_present_num": prds_present_num, "signal": 0})
+            return Response({"materials": materials_serializer.data, "prqds_present_num": prqds_present_num, "signal": 0})
         else:
             return Response({"message": "空空如也你不服？"})
 
@@ -289,17 +289,17 @@ class PurchaseRequestDetailNewView(APIView):
 #         需要获取物料详情(iden ,现存量，请购量就可以了)，请购单编号
 #         """
 #         data = json.loads(request.body.decode("utf-8"))
-#         pr_identify = data['pr_identify']
-#         prds = data['prds']
-#         for prd in prds:
-#             prd_identify = prd['prd_identify']
-#             # prd_num = prd['prd_num']
-#             prd_present_num = prd['prd_present_num']
-#             material = Material.objects.get(material_iden=prd_identify)
-#             pr = models.PurchaseRequest.objects.get(pr_identify=pr_identify)
+#         prq_identify = data['prq_identify']
+#         prqds = data['prqds']
+#         for prqd in prqds:
+#             prqd_identify = prqd['prqd_identify']
+#             # prqd_num = prqd['prqd_num']
+#             prqd_present_num = prqd['prqd_present_num']
+#             material = Material.objects.get(material_iden=prqd_identify)
+#             prq = models.PurchaseRequest.objects.get(prq_identify=prq_identify)
 #             try:
-#                 if models.PurchaseRequestDetail.objects.create(purchase_request=pr, material=material, prd_num=prd_present_num,
-#                                                   prd_present_num=prd_present_num, prd_used=0):
+#                 if models.PurchaseRequestDetail.objects.create(purchase_request=prq, material=material, prqd_num=prqd_present_num,
+#                                                   prqd_present_num=prqd_present_num, prqd_used=0):
 #                     pass
 #                 else:
 #                     return Response({"message": "新建物料出现错误"})
@@ -319,9 +319,9 @@ class PurchaseRequestDeleteView(APIView):
     def post(self, request):
         """需要数据为请购单编号"""
         data = json.loads(request.body.decode("utf-8"))
-        pr_identify = data['pr_identify']
+        prq_identify = data['prq_identify']
         try:
-            if models.PurchaseRequest.objects.filter(pr_identify=pr_identify).delete()[0]:
+            if models.PurchaseRequest.objects.filter(prq_identify=prq_identify).delete()[0]:
                 pass
             else:
                 self.message = "删除请购单失败"
@@ -339,7 +339,7 @@ class PurchaseRequestCloseView(APIView):
         self.signal = 0
         self.user_now_name = ""
         self.area_name = ""
-        self.pr_new_identify = ""
+        self.prq_new_identify = ""
 
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
@@ -349,12 +349,12 @@ class PurchaseRequestCloseView(APIView):
             self.user_now_name = user_now.user_name
             self.area_name = user_now.area_name
 
-        pr_identify = data['pr_identify']
-        pr_closerReason = data['pr_closerReason']
+        prq_identify = data['prq_identify']
+        prq_closerReason = data['prq_closerReason']
         try:
-            if models.PurchaseRequest.objects.filter(pr_identify=pr_identify).update(pr_status=2, pr_closer=self.user_now_name,
-                                                                             pr_closer_iden = user_identify,
-                                                                             pr_closeReason=pr_closerReason):
+            if models.PurchaseRequest.objects.filter(prq_identify=prq_identify).update(prq_status=2, prq_closer=self.user_now_name,
+                                                                             prq_closer_iden = user_identify,
+                                                                             prq_closeReason=prq_closerReason):
                 pass
             else:
                 traceback.print_exc()
