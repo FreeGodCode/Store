@@ -47,8 +47,7 @@ INSTALLED_APPS = [
     'purchaseRequest',  # 请购单
     'storeAdjust',  # 仓库调整
     'sell',
-
-
+    'storeManage',  # 仓库管理
 ]
 
 MIDDLEWARE = [
