@@ -120,8 +120,8 @@ class OrderDetail(models.Model):
     """采购订单明细"""
     id = models.AutoField(primary_key=True)
     purchase_order = models.ForeignKey('PurchaseOrder', verbose_name='采购订单', related_name='po_od', on_delete=models.CASCADE)
-    pr_detail = models.ForeignKey('purchaseRequest.PurchaseRequest', verbose_name='请购单物料明细', related_name='pr_od', on_delete=models.CASCADE)
-    pcd_detail = models.ForeignKey('PurchaseContractDetail', verbose_name='合同物料明细', related_name='pcd_od', on_delete=models.CASCADE)
+    # pr_detail = models.ForeignKey('purchaseRequest.PurchaseRequest', verbose_name='请购单物料明细', related_name='pr_od', on_delete=models.CASCADE)
+    # pcd_detail = models.ForeignKey('PurchaseContractDetail', verbose_name='合同物料明细', related_name='pcd_od', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_od', on_delete=models.CASCADE)
     od_num = models.IntegerField(verbose_name='采购数量')
     od_taxRate = models.IntegerField(default=13, verbose_name='税率')

@@ -10,7 +10,7 @@ class PurchaseRequest(models.Model):
         (1, '已审批'),
         (2, '已关闭')
     )
-    id = models.AutoField(prqimary_key=True)
+    id = models.AutoField(primary_key=True)
     prq_identify = models.CharField(max_length=15, verbose_name='请购单编号')
     prq_serial = models.CharField(max_length=4, verbose_name='请购单流水')
     organization = models.ForeignKey('base.Organization', related_name='org_prq', verbose_name='组织', on_delete=models.CASCADE)
@@ -44,7 +44,7 @@ class PurchaseRequestDetail(models.Model):
         (0, '未使用'),
         (1, '已使用')
     )
-    id = models.AutoField(prqimary_key=True)
+    id = models.AutoField(primary_key=True)
     prq_identify = models.CharField(max_length=15,verbose_name="请购单编号")
     purchase_request = models.ForeignKey('PurchaseRequest', related_name='prq_prqd', verbose_name='请购单', on_delete=models.CASCADE)
     material = models.ForeignKey('base.Material', verbose_name='物料', related_name='material_prqd', on_delete=models.CASCADE)  # attention
