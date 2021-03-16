@@ -6,9 +6,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Max, Q
 from rest_framework.views import APIView
-from .models import UserProfile, UserNow, Measure,  Material, MaterialType, Center, Customer, CenterWareHouse,TotalWareHouse, Supplier, Department, Brand, Role, Organization, Area
-from .serializer import CustomerSerializer, CenterSerializer, CenterWareHouseSerializer, DepartmentSerializer, BrandSerializer, AreaSerializer, TotalWareHouseSerializer, MaterialSerializer, MeasureSerializer,MaterialTypeSerializer,SupplierSerializer, RoleSerializer, OrganizationSerializer,UserProfileSerializer
 
+from . import models
+from .models import UserProfile, UserNow, Measure, Material, MaterialType, Center, Customer, CenterWareHouse, \
+    TotalWareHouse, Supplier, Department, Brand, Role, Organization, Area
+from .serializer import CustomerSerializer, CenterSerializer, CenterWareHouseSerializer, DepartmentSerializer, \
+    BrandSerializer, AreaSerializer, TotalWareHouseSerializer, MaterialSerializer, MeasureSerializer, \
+    MaterialTypeSerializer, SupplierSerializer, RoleSerializer, OrganizationSerializer, UserProfileSerializer
+from rest_framework.response import Response
 logger = logging.getLogger(__name__)
 
 
@@ -465,7 +470,7 @@ class CustomerAddView(APIView):
     def post(self, request):
         data = json.loads(request.body.decode('utf-8'))
         user_identify = data['user_identify']
-        user_now = UserNOw.objects.get(user_identify=user_identify)
+        user_now = UserNow.objects.get(user_identify=user_identify)
         if user_now:
             self.user_now_name = user_now.user_name
 
@@ -950,7 +955,8 @@ class TotalWareHouseAddView(APIView):
         brand_name = data['brand_name']
         total_belong_center = data['total_belong_center']
         try:
-            total_belong_center_identify = models.Center.objects.get(center_name=total_belong_center, area_name=area_name)
+            total_belong_center_identify = models.Center.objects.get(center_name=total_belong_center,
+                                                                     area_name=area_name)
         except models.Center.DoesNotExist:
             total_belong_center_identify = ""
         else:
@@ -960,7 +966,12 @@ class TotalWareHouseAddView(APIView):
 
         organization = Organization.objects.get(area_name=area_name, org_name=org_name)
         if self.idCheck(total_identify):
-            TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name, total_belong_center=total_belong_center, total_belong_center_identify=total_belong_center_identify, brand_name=brand_name, organization=organization, total_remarks=total_remarks, total_status=0, total_creator=self.user_now_name, total_creator_iden=user_identify)
+            TotalWareHouse.objects.create(total_identify=total_identify, total_name=total_name,
+                                          total_belong_center=total_belong_center,
+                                          total_belong_center_identify=total_belong_center_identify,
+                                          brand_name=brand_name, organization=organization, total_remarks=total_remarks,
+                                          total_status=0, total_creator=self.user_now_name,
+                                          total_creator_iden=user_identify)
         return Response({'message': self.message, 'signal': self.signal})
 
     def idCheck(self, total_identify):
@@ -991,7 +1002,9 @@ class TotalWareHouseUpdateView(APIView):
         total_remarks = data['total_remarks']
         if self.idCheck(total_identify, id):
             try:
-                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name, brand_name=brand_name, total_remarks=total_remarks)
+                TotalWareHouse.objects.filter(total_identify=total_identify).update(total_name=total_name,
+                                                                                    brand_name=brand_name,
+                                                                                    total_remarks=total_remarks)
             except:
                 self.message = "更新失败"
                 self.signal = 1
@@ -1148,7 +1161,8 @@ class CenterWareHouseNewView(APIView):
         areas_list = Area.objects.filter(area_status=1).values_list('area_name', flat=True)
         for area_name in areas_list:
             org_center = []
-            organization = Organization.objects.filter(area_name=area_name, orga_status=1).values_list('org_name', flat=True)
+            organization = Organization.objects.filter(area_name=area_name, orga_status=1).values_list('org_name',
+                                                                                                       flat=True)
             center = Center.objects.filter(area_name=area_name, center_status=1).values_list('center_name', flat=True)
             org_center.append(organization)
             org_center.append(center)
@@ -1242,7 +1256,9 @@ class SupplierAddView(APIView):
         supply_name = data['supply_name']
         supply_type = data['supply_type']
         supply_remarks = data['supply_remarks']
-        Supplier.objects.create(supply_identify=supply_identify, supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks, supply_creator=self.user_now_name, supply_creator_iden=user_identify)
+        Supplier.objects.create(supply_identify=supply_identify, supply_name=supply_name, supply_type=supply_type,
+                                supply_remarks=supply_remarks, supply_creator=self.user_now_name,
+                                supply_creator_iden=user_identify)
         return Response({'message': self.message, 'signal': self.signal})
 
 
@@ -1264,7 +1280,9 @@ class SupplierUpdateView(APIView):
         supply_status = data['supply_status']
         supply_creator = data['supply_creator']
         try:
-            Supplier.objects.filter(supply_identify=supply_identify).update(supply_name=supply_name, supply_type=supply_type, supply_remarks=supply_remarks)
+            Supplier.objects.filter(supply_identify=supply_identify).update(supply_name=supply_name,
+                                                                            supply_type=supply_type,
+                                                                            supply_remarks=supply_remarks)
         except:
             self.message = "更新失败"
             self.signal = 1
@@ -1293,7 +1311,7 @@ class MeasuresView(APIView):
         max_id = Measure.objects.all().aggregate(Max('measure_identify'))['measure_identify__max']
         measure = Measure.objects.all()
         if measure:
-            measure_serializer = measureerializer(measure, many=True)
+            measure_serializer = MeasureSerializer(measure, many=True)
             logger.info(measure_serializer.data)
             # print(measure_serializer.data)
             return Response({"max_identify": max_id, "measure": measure_serializer.data})
@@ -1323,9 +1341,9 @@ class MeasureAddView(APIView):
         if self.idCheck(measure_identify):
             if self.nameCheck(measure_name):
                 Measure.objects.create(measure_identify=measure_identify, measure_name=measure_name,
-                                               measure_dimension=measure_dimension, measure_status=0,
-                                               measure_creator=self.user_now_name,
-                                               measure_creator_iden=user_identify)
+                                       measure_dimension=measure_dimension, measure_status=0,
+                                       measure_creator=self.user_now_name,
+                                       measure_creator_iden=user_identify)
 
         return Response({'message': self.message, 'signal': self.signal})
 
@@ -1366,7 +1384,7 @@ class MeasureUpdateView(APIView):
         if self.idCheck(measure_identify, id):
             try:
                 Measure.objects.filter(id=id).update(measure_name=measure_name,
-                                                             measure_dimension=measure_dimension)
+                                                     measure_dimension=measure_dimension)
             except:
                 self.message = "更新失败"
                 self.signal = 1
@@ -1385,6 +1403,7 @@ class MeasureUpdateView(APIView):
 
 class MeasureStatusView(APIView):
     """"""
+
     def post(self, request):
         data = json.loads(request.body.decode("utf-8"))
         measure_status = data['measure_status']
@@ -1432,8 +1451,9 @@ class MaterialTypeAddView(APIView):
         type_identify = data['type_identify']
         type_name = data['type_name']
 
-        if self.idCheck(type_iden):
-            MaterialType.objects.create(type_iden=type_iden, type_name=type_name, type_status=0, type_creator=self.user_now_name, type_creator_identify=user_identify)
+        if self.idCheck(type_identify):
+            MaterialType.objects.create(type_iden=type_identify, type_name=type_name, type_status=0,
+                                        type_creator=self.user_now_name, type_creator_identify=user_identify)
 
         return Response({"message": self.message, "signal": self.signal})
 
@@ -1504,7 +1524,8 @@ class MaterialNewView(APIView):
     def get(self, request):
         """物料类别及其名字和最大流水号编码"""
         material_types = Material.objects.filter(type_status=1).values_list('type_identify', 'type_name')
-        measure = models.Meterage.objects.filter(measure_status=1).values_list('measure_dimension',   'measure_identify', 'measure_name')
+        measure = models.Meterage.objects.filter(measure_status=1).values_list('measure_dimension', 'measure_identify',
+                                                                               'measure_name')
         return Response({"material_types": material_types, "measure": measure})
 
 
@@ -1531,18 +1552,20 @@ class MaterialAddView(APIView):
         measure_name = data['measure_name']
         material_attr = data['material_attr']
 
-        max_id = Material.objects.filter(material_type_identify=material_type_identify).aggregate(Max('material_identify'))['material_identify__max']
+        max_id = \
+        Material.objects.filter(material_type_identify=material_type_identify).aggregate(Max('material_identify'))[
+            'material_identify__max']
         if max_id:
             material_identify = str(int(max_id) + 1)
         else:
             material_identify = material_type_identify + "00001"
         Material.objects.create(material_identify=material_identify, material_name=material_name,
-                                       material_type_identify=material_type_identify,
-                                       material_specification=material_specification,
-                                       material_model=material_model, measure_name=measure_name,
-                                       material_attr=material_attr, material_status=0,
-                                       material_creator=self.user_now_name,
-                                       material_creator_identify=user_identify)
+                                material_type_identify=material_type_identify,
+                                material_specification=material_specification,
+                                material_model=material_model, measure_name=measure_name,
+                                material_attr=material_attr, material_status=0,
+                                material_creator=self.user_now_name,
+                                material_creator_identify=user_identify)
         return Response({'message': self.message, 'signal': self.signal})
 
 
@@ -1565,7 +1588,10 @@ class MaterialUpdateView(APIView):
         material_attr = data['material_attr']
 
         try:
-            Material.objects.filter(id=id).update(material_name=material_name, material_specification=material_specification, material_model=material_model,   measure_name=measure_name, material_attr=material_attr, )
+            Material.objects.filter(id=id).update(material_name=material_name,
+                                                  material_specification=material_specification,
+                                                  material_model=material_model, measure_name=measure_name,
+                                                  material_attr=material_attr, )
         except:
             self.message = "更新失败"
             self.signal = 1
