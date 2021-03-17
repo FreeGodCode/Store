@@ -1,22 +1,25 @@
+import json
 import traceback
-import datetime
+# import datetime
 import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Q, Max
+from django.db.models import Q, Max, Sum
 from django.utils import timezone
-from django.shortcuts import render, redirect
-from base.models import UserNow, UserProfile, Organization, Supplier, Material, Department
+# from django.shortcuts import render, redirect
+from base.models import UserNow, Organization, Material, Department
+from base.serializer import MaterialSerializer
+from storeManage.models import TotalStock
 
 from . import models
-from .serializer import PurchaseRequestSerializer,  PurchaseRequestDetailSerializer
-
+from .serializer import PurchaseRequestSerializer, PurchaseRequestDetailSerializer
 
 logger = logging.getLogger(__name__)
 
 
 class PurchaseRequestsView(APIView):
     """获取所有请购单"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user_now_name = ""
@@ -37,10 +40,13 @@ class PurchaseRequestsView(APIView):
         if permission == '1':
             prqs = models.PurchaseRequest.objects.filter(~Q(prq_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
-            prqs = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify, organization__area_name=self.area_name).all()
+            prqs = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify,
+                                                         organization__area_name=self.area_name).all()
         else:
-            prqs1 = models.PurchaseRequest.objects.filter(~Q(prq_status=0), organization__area_name=self.area_name).all()
-            prqs2 = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify, organization__area_name=self.area_name).all()
+            prqs1 = models.PurchaseRequest.objects.filter(~Q(prq_status=0),
+                                                          organization__area_name=self.area_name).all()
+            prqs2 = models.PurchaseRequest.objects.filter(prq_creator_identify=user_identify,
+                                                          organization__area_name=self.area_name).all()
             prqs = prqs1 | prqs2
         if prqs:
             prqs_serializer = PurchaseRequestSerializer(prqs, many=True)
@@ -51,6 +57,7 @@ class PurchaseRequestsView(APIView):
 
 class PurchaseRequestNewView(APIView):
     """新建请购单"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user_now_name = ""
@@ -79,15 +86,16 @@ class PurchaseRequestNewView(APIView):
                 material = prqd.material
                 prqd_present_num = TotalStock.objects.filter(
                     totalwarehouse__organization__org_name=org_name,
-                   totalwarehouse__organization__area_name=self.area_name,
-                    material=material).aggregate( prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
+                    totalwarehouse__organization__area_name=self.area_name,
+                    material=material).aggregate(prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
                 if prqd_present_num:
                     pass
                 else:
                     prqd_present_num = 0
                 prqds_present_num.append(prqd_present_num)
 
-            return Response({"org_names": org_names, 'dpms': dpms, "prqds": prqds_serializers.data, "prqds_present_num": prqds_present_num, "signal": 1})
+            return Response({"org_names": org_names, 'dpms': dpms, "prqds": prqds_serializers.data,
+                             "prqds_present_num": prqds_present_num, "signal": 1})
 
 
 # class PurchaseRequestUpdateView(APIView):
@@ -174,7 +182,8 @@ class PurchaseRequestUpdateView(APIView):
         else:
             prq = models.PurchaseRequest.objects.filter(prq_identify=prq_identify)
             if prq:
-                if prq.update(organization=organization, prq_department=department_name, prq_type=prq_type, prq_date=prq_date, prq_remarks=prq_remarks):
+                if prq.update(organization=organization, prq_department=department_name, prq_type=prq_type,
+                              prq_date=prq_date, prq_remarks=prq_remarks):
                     pass
                 else:
                     self.message = "更新失败"
@@ -187,6 +196,7 @@ class PurchaseRequestUpdateView(APIView):
 
 class PurchaseRequestDetailSaveView(APIView):
     """"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.message = "请购单详情保存成功"
@@ -209,10 +219,10 @@ class PurchaseRequestDetailSaveView(APIView):
             material = Material.objects.get(material_iden=prqd_identify)
             try:
                 s = models.PurchaseRequestDetail.objects.create(purchase_request=prq, prqd_num=prqd_num,
-                                                   material = material,
-                                                   prqd_used = 0,
-                                                   prqd_present_num=prqd_present_num,
-                                                   prqd_remarks=prqd_remarks)
+                                                                material=material,
+                                                                prqd_used=0,
+                                                                prqd_present_num=prqd_present_num,
+                                                                prqd_remarks=prqd_remarks)
                 print(s)
                 #     pass
                 # else:
@@ -227,6 +237,7 @@ class PurchaseRequestDetailSaveView(APIView):
 
 class PurchaseRequestDetailSubmitView(APIView):
     """提交请购单详情"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.message = "请购单提交成功"
@@ -250,6 +261,7 @@ class PurchaseRequestDetailSubmitView(APIView):
 
 class PurchaseRequestDetailNewView(APIView):
     """请购单详情"""
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user_now_name = ""
@@ -270,15 +282,17 @@ class PurchaseRequestDetailNewView(APIView):
             prqds_present_num = []
             for material in materials:
                 prqd_present_num = TotalStock.objects.filter(totalwarehouse__organization__org_name=org_name,
-                                                            totalwarehouse__organization__area_name=self.area_name,
-                                                            material=material).aggregate(prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
+                                                             totalwarehouse__organization__area_name=self.area_name,
+                                                             material=material).aggregate(
+                    prqd_present_num=Sum('ts_present_num'))['prqd_present_num']
                 if prqd_present_num:
                     pass
                 else:
                     prqd_present_num = 0
                 prqds_present_num.append(prqd_present_num)
 
-            return Response({"materials": materials_serializer.data, "prqds_present_num": prqds_present_num, "signal": 0})
+            return Response(
+                {"materials": materials_serializer.data, "prqds_present_num": prqds_present_num, "signal": 0})
         else:
             return Response({"message": "空空如也你不服？"})
 
@@ -352,9 +366,10 @@ class PurchaseRequestCloseView(APIView):
         prq_identify = data['prq_identify']
         prq_closerReason = data['prq_closerReason']
         try:
-            if models.PurchaseRequest.objects.filter(prq_identify=prq_identify).update(prq_status=2, prq_closer=self.user_now_name,
-                                                                             prq_closer_iden = user_identify,
-                                                                             prq_closeReason=prq_closerReason):
+            if models.PurchaseRequest.objects.filter(prq_identify=prq_identify).update(prq_status=2,
+                                                                                       prq_closer=self.user_now_name,
+                                                                                       prq_closer_iden=user_identify,
+                                                                                       prq_closeReason=prq_closerReason):
                 pass
             else:
                 traceback.print_exc()

@@ -1,12 +1,16 @@
 import json
+
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.db.models import Q, Max
-from django.shortcuts import render, redirect
-
-from ..base.models import UserNow, Organization, Department, Customer, Material, Measure, TotalWareHouse
-from . models import SellOrder, SellOrderDetail
+# from django.shortcuts import render, redirect
+from storeManage.models import TotalStock
+from storeManage.serializer import TotalStockSerializer
+from . import models
+from ..base.models import UserNow, Organization, Customer, Material, TotalWareHouse
+# from . models import SellOrder, SellOrderDetail
 from .serializer import SellOrderSerializer, SellOrderDetailSerializer
 
 
@@ -30,10 +34,12 @@ class SellOrdersView(APIView):
             sos = models.SellOrder.objects.filter(~Q(so_status=0), organization__area_name=self.area_name).all()
 
         if power == '2':
-            sos = models.SellOrder.objects.filter(so_creator_iden=user_identify, organization__area_name=self.area_name).all()
+            sos = models.SellOrder.objects.filter(so_creator_iden=user_identify,
+                                                  organization__area_name=self.area_name).all()
         elif power == '3':
             sos1 = models.SellOrder.objects.filter(~Q(so_status=0), organization__area_name=self.area_name).all()
-            sos2 = models.SellOrder.objects.filter(so_creator_iden=user_identify, organization__area_name=self.area_name).all()
+            sos2 = models.SellOrder.objects.filter(so_creator_iden=user_identify,
+                                                   organization__area_name=self.area_name).all()
             sos = sos1 | sos2
         if sos:
             sos_serializer = SellOrderSerializer(sos, many=True)
@@ -64,7 +70,8 @@ class SellOrderNewView(APIView):
         organizations = Organization.objects.filter(area_name=self.area_name, org_status=1)
         for organization in organizations:
             org_name = organization.org_name
-            deliver_ware_houses = TotalWareHouse.objects.filter(organization=organization, total_status=1).values_list("total_name", flat=True)
+            deliver_ware_houses = TotalWareHouse.objects.filter(organization=organization, total_status=1).values_list(
+                "total_name", flat=True)
             org_ware_houses[org_name] = deliver_ware_houses
 
         customers = Customer.objects.filter(customer_status=1).values_list("id", "customer_name")
@@ -93,7 +100,7 @@ class SellOrderNewView(APIView):
                 sods_present_num.append(sod_present_num)
 
             return Response({"org_ware_houses": org_ware_houses, "customers": customers,
-                 "sods": sods_serializers.data, "sods_present_num": sods_present_num, "signal": 1})
+                             "sods": sods_serializers.data, "sods_present_num": sods_present_num, "signal": 1})
 
 
 class SellOrderUpdateView(APIView):
@@ -139,7 +146,8 @@ class SellOrderUpdateView(APIView):
             so_new_identify = pre_identify + so_serial
             self.so_new_identify = so_new_identify
             try:
-                if models.SellOrder.objects.create(so_identify=so_new_identify, so_serial=so_serial, organization=organization,
+                if models.SellOrder.objects.create(so_identify=so_new_identify, so_serial=so_serial,
+                                                   organization=organization,
                                                    so_type=so_type, customer=customer, so_date=so_date,
                                                    deliver_ware_house=deliver_ware_house,
                                                    so_remarks=so_remarks,
@@ -198,14 +206,14 @@ class SellOrderDetailSaveView(APIView):
 
             try:
                 if models.SellOrderDetail.objects.create(sell_order=so, material=material,
-                                                  sod_num=sod_num,
-                                                  sod_taxRate=sod_taxRate,
-                                                  sod_tax_unitPrice=sod_tax_unitPrice,
-                                                  sod_unitPrice=sod_unitPrice,
-                                                  sod_tax_sum=sod_tax_sum,
-                                                  sod_sum=sod_sum,
-                                                  sod_tax_price=sod_tax_price,
-                                                  sod_remarks=sod_remarks):
+                                                         sod_num=sod_num,
+                                                         sod_taxRate=sod_taxRate,
+                                                         sod_tax_unitPrice=sod_tax_unitPrice,
+                                                         sod_unitPrice=sod_unitPrice,
+                                                         sod_tax_sum=sod_tax_sum,
+                                                         sod_sum=sod_sum,
+                                                         sod_tax_price=sod_tax_price,
+                                                         sod_remarks=sod_remarks):
                     pass
                 else:
                     self.message = "销售订单详情保存失败"
@@ -333,7 +341,6 @@ class SellOrderDeleteView(APIView):
             self.message = "删除销售订单失败"
             self.signal = 1
         return Response({'message': self.message, 'signal': self.signal})
-
 
 # class SellOrderCloseView(APIView):
 #     def __init__(self, **kwargs):

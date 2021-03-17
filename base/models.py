@@ -363,7 +363,7 @@ class Measure(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.meterage_name
+        return self.measure_name
 
 
 class MaterialType(models.Model):

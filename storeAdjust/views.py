@@ -1,12 +1,14 @@
 import json
 import traceback
 
+from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import render, redirect
+# from django.shortcuts import render, redirect
 from django.db.models import Q, Max
 
-from base.models import UserNow, Department, Organization
+from base.models import UserNow, Department, Organization, TotalWareHouse, Material
+from storeManage.models import TotalStock
 from . import models
 from .serializer import TransferRequestSerializer, TransferSerializer, TransferRequestDetailSerializer, \
     TransferDetailSerializer, TransferRequestDetailToTransferDetailSerializer
@@ -73,8 +75,8 @@ class TransferRequestNewView(APIView):
         except:
             return Response({"org_ware_houses": org_ware_houses, "dpms": dpms, 'signal': 0})
         else:
-            trds = models.TrDetail.objects.filter(transfer_request__str_identify=str_identify)
-            trds_serializer = TrDSerializer(trds, many=True)
+            trds = models.TransferRequestDetail.objects.filter(transfer_request__str_identify=str_identify)
+            trds_serializer = TransferRequestDetailSerializer(trds, many=True)
             trds_present_num = []
             for trd in trds:
                 material = trd.material
@@ -168,7 +170,7 @@ class TransferRequestDetailSaveView(APIView):
         data = json.loads(request.body.decode("utf-8"))
         str_identify = data['str_identify']
         trds = data['trds']
-        models.TrDetail.objects.filter(transfer_request__str_identify=str_identify).delete()
+        models.TransferRequestDetail.objects.filter(transfer_request__str_identify=str_identify).delete()
 
         str = models.TransferRequest.objects.get(str_identify=str_identify)
         for trd in trds:
@@ -179,7 +181,7 @@ class TransferRequestDetailSaveView(APIView):
             trd_remarks = trd['trd_remarks']
 
             try:
-                if models.TrDetail.objects.create(transfer_request=str, material=material, trd_num=trd_num,
+                if models.TransferRequestDetail.objects.create(transfer_request=str, material=material, trd_num=trd_num,
                                                   trd_present_num=trd_present_num, trd_used=0, trd_remarks=trd_remarks):
                     pass
                 else:
@@ -328,8 +330,8 @@ class TransferNewView(APIView):
         except:
             return Response({"org_ware_houses": org_ware_houses, 'signal': 0})
         else:
-            tds = models.StDetail.objects.filter(transfer__st_identify=st_identify)
-            tds_serializer = StDSerializer(tds, many=True)
+            tds = models.Transfer.objects.filter(transfer__st_identify=st_identify)
+            tds_serializer = TransferDetailSerializer(tds, many=True)
             tds_present_num = []
             for td in tds:
                 material = td.material

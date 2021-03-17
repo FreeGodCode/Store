@@ -1,9 +1,18 @@
 import json
-from django.shortcuts import render
+# from django.shortcuts import render
+import traceback
+
+from django.db.models import Max, Q
+from django.utils import timezone
+from rest_framework.response import Response
+
+from purchase.models import OrderDetail, PurchaseOrder
+from purchase.serializer import OrderDetailSerializer, PurchaseOrderSerializer
+from storeManage.models import TotalStock
 from .serializer import PurchaseReceiptSerializer, PurchaseReceiptDetailSerializer
 from rest_framework.views import APIView
-from base.models import UserNow, Organization, UserProfile, TotalWareHouse, Supplier, Material, Department
-from . import models
+from base.models import UserNow, Organization, TotalWareHouse, Supplier, Material
+from . import models, serializer
 
 
 class PurchaseReceiptsView(APIView):
@@ -35,7 +44,7 @@ class PurchaseReceiptsView(APIView):
                                                      organization__area_name=self.area_name).all()
             prcs = prcs1 | prcs2
         if prcs:
-            prcs_serializer = models.PurchaseReceiptSerializer(prcs, many=True)
+            prcs_serializer =serializer.PurchaseReceiptSerializer(prcs, many=True)
             return Response({"prcs": prcs_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
@@ -72,7 +81,7 @@ class PurchaseReceiptNewView(APIView):
             return Response({"supply_names": supply_names, "org_ware_houses": org_ware_houses, "signal": 0})
         else:
             prcds = models.PurchaseReceiptDetail.objects.filter(purchase_receipt__prc_identify=prc_identify).all()
-            prcds_serializer = models.PurchaseReceiptDSerializer(prcds, many=True)
+            prcds_serializer = serializer.PurchaseReceiptDetailSerializer(prcds, many=True)
             return Response(
                 {"supply_names": supply_names, "org_ware_houses": org_ware_houses, "prcds": prcds_serializer.data,
                  "signal": 1})
@@ -192,7 +201,7 @@ class PurchaseReceiptDetailSaveView(APIView):
         prcds = data["prcds"]
         prcd_identify = data["prcd_identify"]
         models.PurchaseReceiptDetail.objects.filter(purchase_receipt__prc_identify=prcd_identify).delete()
-        prc = models.PurchaseReceipt.objects.get(prc_identify=prc_identify)
+        prc = models.PurchaseReceipt.objects.get(prc_identify=prcd_identify)
         for prcd in prcds:
             prcd_identify = prcd['prcd_identify']
             material = Material.objects.get(material_identify=prcd_identify)

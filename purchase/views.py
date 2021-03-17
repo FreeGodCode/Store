@@ -2,14 +2,18 @@ import json
 import datetime
 import traceback
 from rest_framework.views import APIView
-from  rest_framework. response import Response
+from rest_framework. response import Response
 
 from django.shortcuts import render
 from django.db.models import Q, Max
 from django.utils import timezone
 from base.models import UserNow, Supplier, Department, Organization, Material
-from . import models
-from . import serializer
+from purchaseRequest.models import PurchaseRequest
+from . import models, serializer
+
+from .models import PurchaseContractDetail
+from .serializer import PurchaseContractDetailSerializer, PurchaseOrderSerializer, OrderDetailSerializer, \
+    PurchaseContractSerializer
 
 
 class PurchaseContractsView(APIView):
@@ -279,14 +283,14 @@ class PurchaseContractDetailNewView(APIView):
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__area_name=self.area_name,
                                            purchase_request__pr_status=1,
                                            prd_used=0).all()
-            prds_serializer = PurchaseContractDetail2Serializer(prds, many=True)
+            prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
             return Response({"prds": prds_serializer.data, 'signal': 0})
         else:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__org_name=org_name,
                                            purchase_request__organization__area_name=self.area_name,
                                            purchase_request__pr_status=1,
                                            prd_used=0).all()
-            prds_serializer = PurchaseContractDetail2Serializer(prds, many=True)
+            prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
             return Response({"prds": prds_serializer.data, 'signal': 0})
 
 
@@ -388,7 +392,7 @@ class PurchaseOrdersView(APIView):
                                                        organization__area_name=self.area_name).all()
             pos = pos1 | pos2
         if pos:
-            pos_serializer = POSerializer(pos, many=True)
+            pos_serializer = PurchaseOrderSerializer(pos, many=True)
             return Response({"pos": pos_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
@@ -441,13 +445,13 @@ class PurchaseContractChoiceView(APIView):
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__area_name=self.area_name,
                                            purchase_request__pr_status=1,
                                            prd_used=0).all()
-            self.prds_serializer = PurchaseContractDetail2Serializer(prds, many=True)
+            self.prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
         else:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__org_name=org_name,
                                            purchase_request__organization__area_name=self.area_name,
                                            purchase_request__pr_status=1,
                                            prd_used=0).all()
-            self.prds_serializer = PurchaseContractDetail2Serializer(prds, many=True)
+            self.prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
         finally:
             return Response({"prds": self.prds_serializer.data, 'signal': 0})
 
@@ -507,7 +511,7 @@ class PurchaseContractChoiceView(APIView):
         else:
             self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name, organization__org_name=org_name, pc_status=1).all()
         finally:
-            pcs_serializer = PCSerializer(self.pcs, many=True)
+            pcs_serializer = PurchaseContractSerializer(self.pcs, many=True)
             pcds_list = ""
             for pc in self.pcs:
                 pc_identify = pc.pc_identify
@@ -516,7 +520,7 @@ class PurchaseContractChoiceView(APIView):
                     pcds_list = pcds
                 else:
                     pcds_list = pcds_list | pcds
-            pcds_serializer = CdDSerializer(pcds_list, many=True)
+            pcds_serializer = PurchaseContractDetailSerializer(pcds_list, many=True)
             return Response({"pcs": pcs_serializer.data, "pcds": pcds_serializer.data, "signal": 0})  # 合同和对应的合同明细
 
 
