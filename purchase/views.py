@@ -2,12 +2,12 @@ import json
 import datetime
 import traceback
 from rest_framework.views import APIView
-from rest_framework. response import Response
+from rest_framework.response import Response
 
-from django.shortcuts import render
+# from django.shortcuts import render
 from django.db.models import Q, Max
 from django.utils import timezone
-from base.models import UserNow, Supplier, Department, Organization, Material
+from base.models import UserNow, Supplier, Organization, Material
 from purchaseRequest.models import PurchaseRequest
 from . import models, serializer
 
@@ -36,10 +36,12 @@ class PurchaseContractsView(APIView):
         if permission == '1':
             pcs = models.PurchaseContract.objects.filter(~Q(pc_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
-            pcs = models.PurchaseContract.objects.filter(pc_creator_iden=user_identify, organization__area_name=self.area_name).all()
+            pcs = models.PurchaseContract.objects.filter(pc_creator_iden=user_identify,
+                                                         organization__area_name=self.area_name).all()
         else:
             pcs1 = models.PurchaseContract.objects.filter(~Q(pc_status=0), organization__area_name=self.area_name).all()
-            pcs2 = models.PurchaseContract.objects.filter(pc_creator_iden=user_identify, organization__area_name=self.area_name).all()
+            pcs2 = models.PurchaseContract.objects.filter(pc_creator_iden=user_identify,
+                                                          organization__area_name=self.area_name).all()
             pcs = pcs1 | pcs2
         if pcs:
             pcs_serializer = serializer.PurchaseContractSerializer(pcs, many=True)
@@ -50,6 +52,7 @@ class PurchaseContractsView(APIView):
 
 class PurchaseContractNewView(APIView):
     """"""
+
     def __init__(self, **kwargs):
         super(PurchaseContractNewView, self).__init__(**kwargs)
         self.user_now_name = ""
@@ -73,7 +76,7 @@ class PurchaseContractNewView(APIView):
             pcds = models.PurchaseContractDetail.objects.filter(purchase_contract__pc_identify=pc_identify)
             pcds_serializer = serializer.PurchaseContractDetailSerializer(pcds, many=True)
             pays = models.PurchaseContractPayDetail.objects.filter(purchase_contract__pc_identify=pc_identify)
-            pays_serializer = serializer.PurchaseContractPaySerializer(pays, many=True)
+            pays_serializer = serializer.PurchaseContractPayDetailSerializer(pays, many=True)
             return Response({
                 "org_names": org_names, "supply_names": supply_names, "pcds": pcds_serializer.data,
                 "pays": pays_serializer.data, "signal": 1
@@ -82,8 +85,9 @@ class PurchaseContractNewView(APIView):
 
 class PurchaseContractUpdateView(APIView):
     """订单合同更新"""
+
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
         self.signal = 0
         self.user_now_name = ""
@@ -219,7 +223,7 @@ class PurchaseContractDetailSaveView(APIView):
 
 class PurchaseContractDetailSubmitView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractDetailSubmitView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
         self.message = "合同明细提交成功"
@@ -247,7 +251,8 @@ class PurchaseContractDetailSubmitView(APIView):
         for pcd in pcds:
             pcd_identify = pcd['pcd_identify']
             pcd_pr_identify = pcd['pcd_pr_identify']
-            PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pcd_pr_identify, material__material_iden=pcd_identify).update(
+            PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pcd_pr_identify,
+                                                  material__material_iden=pcd_identify).update(
                 prd_used=1)
             prds = PurchaseContractDetail.objects.filter(purchase_request__pr_identify=pcd_pr_identify).all()
             pr = PurchaseRequest.objects.filter(pr_identify=pcd_pr_identify)
@@ -257,7 +262,7 @@ class PurchaseContractDetailSubmitView(APIView):
                     flag = 1
             if flag == 0:
                 pr.update(pr_status=2, pr_closer=self.user_now_name, pr_closer_identify=user_identify,
-                          pr_closeDate=datetime.now(), pr_closeReason="自动关闭")
+                          pr_closeDate=datetime.datetime.now(), pr_closeReason="自动关闭")
             # 更新请购单物料使用状态
 
         return Response({'message': self.message, 'signal': self.signal})
@@ -265,7 +270,7 @@ class PurchaseContractDetailSubmitView(APIView):
 
 class PurchaseContractDetailNewView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractDetailNewView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
 
@@ -281,15 +286,15 @@ class PurchaseContractDetailNewView(APIView):
             org_name = data['org_name']
         except:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__area_name=self.area_name,
-                                           purchase_request__pr_status=1,
-                                           prd_used=0).all()
+                                                         purchase_request__pr_status=1,
+                                                         prd_used=0).all()
             prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
             return Response({"prds": prds_serializer.data, 'signal': 0})
         else:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__org_name=org_name,
-                                           purchase_request__organization__area_name=self.area_name,
-                                           purchase_request__pr_status=1,
-                                           prd_used=0).all()
+                                                         purchase_request__organization__area_name=self.area_name,
+                                                         purchase_request__pr_status=1,
+                                                         prd_used=0).all()
             prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
             return Response({"prds": prds_serializer.data, 'signal': 0})
 
@@ -333,7 +338,7 @@ class PurchaseContractDetailNewView(APIView):
 
 class PurchaseContractDeleteView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractDeleteView, self).__init__(**kwargs)
         self.message = "删除合同成功"
         self.signal = 0
 
@@ -363,7 +368,7 @@ class PurchaseContractDeleteView(APIView):
 
 class PurchaseOrdersView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseOrdersView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
 
@@ -400,7 +405,7 @@ class PurchaseOrdersView(APIView):
 
 class PurchaseOrderNewView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseOrderNewView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
 
@@ -426,7 +431,7 @@ class PurchaseOrderNewView(APIView):
 
 class PurchaseContractChoiceView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractChoiceView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
         self.prds_serializer = ""
@@ -443,14 +448,14 @@ class PurchaseContractChoiceView(APIView):
             org_name = data['org_name']
         except:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__area_name=self.area_name,
-                                           purchase_request__pr_status=1,
-                                           prd_used=0).all()
+                                                         purchase_request__pr_status=1,
+                                                         prd_used=0).all()
             self.prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
         else:
             prds = PurchaseContractDetail.objects.filter(purchase_request__organization__org_name=org_name,
-                                           purchase_request__organization__area_name=self.area_name,
-                                           purchase_request__pr_status=1,
-                                           prd_used=0).all()
+                                                         purchase_request__organization__area_name=self.area_name,
+                                                         purchase_request__pr_status=1,
+                                                         prd_used=0).all()
             self.prds_serializer = PurchaseContractDetailSerializer(prds, many=True)
         finally:
             return Response({"prds": self.prds_serializer.data, 'signal': 0})
@@ -492,7 +497,7 @@ class PurchaseContractChoiceView(APIView):
 
 class PurchaseContractChoiceView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseContractChoiceView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
         self.pcs = ""
@@ -509,7 +514,8 @@ class PurchaseContractChoiceView(APIView):
         except:
             self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name, pc_status=1).all()
         else:
-            self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name, organization__org_name=org_name, pc_status=1).all()
+            self.pcs = models.PurchaseContract.objects.filter(organization__area_name=self.area_name,
+                                                              organization__org_name=org_name, pc_status=1).all()
         finally:
             pcs_serializer = PurchaseContractSerializer(self.pcs, many=True)
             pcds_list = ""
@@ -526,7 +532,7 @@ class PurchaseContractChoiceView(APIView):
 
 class PurchaseOrderUpdateView(APIView):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseOrderUpdateView, self).__init__(**kwargs)
         self.message = "更新成功"
         self.signal = 0
         self.user_now_name = ""
@@ -564,7 +570,8 @@ class PurchaseOrderUpdateView(APIView):
             po_new_identify = pre_identify + po_serial
             self.po_new_identify = po_new_identify
             try:
-                if models.PurchaseOrder.objects.create(po_identify=po_new_identify, pc_identify=pc_identify, po_serial=po_serial,
+                if models.PurchaseOrder.objects.create(po_identify=po_new_identify, pc_identify=pc_identify,
+                                                       po_serial=po_serial,
                                                        organization=organization, supplier=supplier,
                                                        po_date=po_date, po_sum=po_sum, po_remarks=po_remarks,
                                                        po_status=0, po_creator=self.user_now_name,
@@ -581,7 +588,8 @@ class PurchaseOrderUpdateView(APIView):
         else:
             po = models.PurchaseOrder.objects.filter(po_identify=po_identify)
             if po:
-                po.update(organization=organization, supplier=supplier, po_date=po_date, po_sum=po_sum, po_remarks=po_remarks)
+                po.update(organization=organization, supplier=supplier, po_date=po_date, po_sum=po_sum,
+                          po_remarks=po_remarks)
             else:
                 self.message = "更新失败"
                 self.signal = 1
@@ -592,7 +600,7 @@ class PurchaseOrderSaveView(APIView):
     """为了实现接口通用，通过发送来源合同字段"""
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseOrderSaveView, self).__init__(**kwargs)
         self.message = "采购订单详情保存成功"
         self.signal = 0
 
@@ -616,10 +624,10 @@ class PurchaseOrderSaveView(APIView):
             material = Material.objects.get(material_iden=od_identify)
             try:
                 if models.OrderDetail.objects.create(purchase_order=po, material=material, od_num=od_num,
-                                                  od_taxRate=od_taxRate, od_tax_unitPrice=od_tax_unitPrice,
-                                                  od_tax_sum=od_tax_sum, od_sum=od_sum, od_unitPrice=od_unitPrice,
-                                                  od_tax_price=od_tax_price, od_pr_identify=od_pr_identify,
-                                                  od_prd_remarks=od_prd_remarks):
+                                                     od_taxRate=od_taxRate, od_tax_unitPrice=od_tax_unitPrice,
+                                                     od_tax_sum=od_tax_sum, od_sum=od_sum, od_unitPrice=od_unitPrice,
+                                                     od_tax_price=od_tax_price, od_pr_identify=od_pr_identify,
+                                                     od_prd_remarks=od_prd_remarks):
                     pass
                 else:
                     self.message = "采购订单详情保存失败"
@@ -635,7 +643,7 @@ class PurchaseOrderSubmitView(APIView):
     """为了实现接口通用，通过发送来源合同字段"""
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(PurchaseOrderSubmitView, self).__init__(**kwargs)
         self.user_now_name = ""
         self.area_name = ""
         self.message = "请购单提交成功"
@@ -668,7 +676,8 @@ class PurchaseOrderSubmitView(APIView):
             for od in ods:
                 od_identify = od['od_identify']
                 od_pr_identify = od['od_pr_identify']
-                PurchaseContractDetail.objects.filter(purchase_request__pr_identify=od_pr_identify, material__material_identify=od_identify).update(prd_used=1)
+                PurchaseContractDetail.objects.filter(purchase_request__pr_identify=od_pr_identify,
+                                                      material__material_identify=od_identify).update(prd_used=1)
                 prds = PurchaseContractDetail.objects.filter(purchase_request__pr_identify=od_pr_identify).all()
                 pr = PurchaseRequest.objects.filter(pr_identify=od_pr_identify)
                 flag = 0
@@ -676,7 +685,8 @@ class PurchaseOrderSubmitView(APIView):
                     if prd.prd_used == 0:
                         flag = 1
                 if flag == 0:
-                    pr.update(pr_status=2, pr_closer=self.user_now_name, pr_closer_identify=user_identify, pr_closeDate=datetime.datetime.now(), pr_closeReason="自动关闭")
+                    pr.update(pr_status=2, pr_closer=self.user_now_name, pr_closer_identify=user_identify,
+                              pr_closeDate=datetime.datetime.now(), pr_closeReason="自动关闭")
         return Response({'message': self.message, 'signal': self.signal})
 
 
