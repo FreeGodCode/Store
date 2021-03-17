@@ -12,7 +12,8 @@ from storeManage.models import TotalStock
 from .serializer import PurchaseReceiptSerializer, PurchaseReceiptDetailSerializer
 from rest_framework.views import APIView
 from base.models import UserNow, Organization, TotalWareHouse, Supplier, Material
-from . import models, serializer
+from . import models
+from . import serializer
 
 
 class PurchaseReceiptsView(APIView):
@@ -37,14 +38,15 @@ class PurchaseReceiptsView(APIView):
             prcs = models.PurchaseReceipt.objects.filter(~Q(prc_status=0), organization__area_name=self.area_name).all()
         elif permission == '2':
             prcs = models.PurchaseReceipt.objects.filter(prc_creator_identify=user_identify,
-                                                    organization__area_name=self.area_name).all()
+                                                         organization__area_name=self.area_name).all()
         else:
-            prcs1 = models.PurchaseReceipt.objects.filter(~Q(prc_status=0), organization__area_name=self.area_name).all()
+            prcs1 = models.PurchaseReceipt.objects.filter(~Q(prc_status=0),
+                                                          organization__area_name=self.area_name).all()
             prcs2 = models.PurchaseReceipt.objects.filter(prc_creator_identify=user_identify,
-                                                     organization__area_name=self.area_name).all()
+                                                          organization__area_name=self.area_name).all()
             prcs = prcs1 | prcs2
         if prcs:
-            prcs_serializer =serializer.PurchaseReceiptSerializer(prcs, many=True)
+            prcs_serializer = serializer.PurchaseReceiptSerializer(prcs, many=True)
             return Response({"prcs": prcs_serializer.data, "signal": 0})
         else:
             return Response({"message": "未查询到信息"})
@@ -129,10 +131,10 @@ class PurchaseReceiptUpdateView(APIView):
             self.prc_new_identify = prc_new_identify
             try:
                 if models.PurchaseReceipt.objects.create(prc_identify=self.prc_new_identify, prc_serial=prc_serial,
-                                                    organization=organization, totalwarehouse=in_ware_house,
-                                                    supplier=supplier, prc_date=prc_date, prc_remarks=prc_remarks,
-                                                    prc_status=0, prc_creator=self.user_now_name,
-                                                    prc_creator_identify=user_identify):
+                                                         organization=organization, totalwarehouse=in_ware_house,
+                                                         supplier=supplier, prc_date=prc_date, prc_remarks=prc_remarks,
+                                                         prc_status=0, prc_creator=self.user_now_name,
+                                                         prc_creator_identify=user_identify):
                     self.message = "新建采购入库单成功"
                     self.signal = 0
                 else:
@@ -214,10 +216,11 @@ class PurchaseReceiptDetailSaveView(APIView):
 
             try:
                 if models.PurchaseReceiptDetail.objects.create(purchase_receipt=prc, material=material,
-                                                          prcd_paper_num=prcd_paper_num,
-                                                          prcd_real_num=prcd_real_num, prcd_unitPrice=prcd_unitPrice,
-                                                          prcd_sum=prcd_sum,
-                                                          po_identify=po_identify, prq_identify=prq_identify):
+                                                               prcd_paper_num=prcd_paper_num,
+                                                               prcd_real_num=prcd_real_num,
+                                                               prcd_unitPrice=prcd_unitPrice,
+                                                               prcd_sum=prcd_sum,
+                                                               po_identify=po_identify, prq_identify=prq_identify):
                     pass
                 else:
                     self.message = "采购入库单详情保存失败"
